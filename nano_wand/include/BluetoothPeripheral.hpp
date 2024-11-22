@@ -10,16 +10,14 @@ class BluetoothPeripheral {
         const char* deviceName;
         BLEService service;
         BLEUnsignedCharCharacteristic characteristic;
-        uint8_t value;
 
     public:
-        BluetoothPeripheral(const char* sUUID, const char* cUUID, const char* dName, uint8_t initialValue)
+        BluetoothPeripheral(const char* sUUID, const char* cUUID, const char* dName)
         : serviceUUID(sUUID),
           charUUID(cUUID),
           deviceName(dName),
           service(sUUID),
-          characteristic(cUUID, BLERead | BLEWrite),
-          value(initialValue)
+          characteristic(cUUID, BLERead | BLEWrite)
         {}
 
         bool begin() {
@@ -31,37 +29,21 @@ class BluetoothPeripheral {
             BLE.setAdvertisedService(service);
             service.addCharacteristic(characteristic);
             BLE.addService(service);
-            characteristic.writeValue(value);
             BLE.advertise();
             return true;
         }
 
-        void updateValue() {
+        void updateValue(uint8_t value) {
             characteristic.writeValue(value);
         }
-
-        void setValue(uint8_t newValue) {
-            value = newValue;
-        }
-
+        
         void handleConnection() {
             BLEDevice central = BLE.central();
-            if (central) {
+            if (central && !central.connected()) {
                 Serial.print("Connected to central: ");
                 Serial.println(central.address());
-                
-                while (central.connected()) {
-                    updateValue();
-                    Serial.print("Sent value: ");
-                    Serial.println(value);
-                    value = (value % 10) + 1; // Cycle through 1-10 for testing
-                    delay(1000);
-                }
-
-                Serial.println("Disconnected from central.");
-            } else {
+            } else if (!central) {
                 Serial.println("Not connected...");
-                delay(1000);
             }
         }
 };

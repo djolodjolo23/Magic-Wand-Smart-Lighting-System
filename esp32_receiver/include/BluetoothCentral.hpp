@@ -2,86 +2,103 @@
 
 #include <Arduino.h>
 #include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEScan.h>
 
 class BluetoothCentral {
-    private:
-        const char* serviceUUID;
-        const char* charUUID;
-        BLEClient* client;
-        BLERemoteCharacteristic* remoteChar;
+private:
+    BLEUUID serviceUUID;
+    BLEUUID charUUID;
+    BLEClient* client;
+    BLERemoteCharacteristic* remoteChar;
+    String targetDeviceName;
 
-    public:
-        BluetoothCentral(const char* sUUID, const char* cUUID, const char* deviceName)
-        : serviceUUID(sUUID),
-          charUUID(cUUID)
-        {
-            BLEDevice::init(deviceName);
-            client = BLEDevice::createClient();
+public:
+    BluetoothCentral(const char* sUUID, const char* cUUID, const char* deviceName)
+    : serviceUUID(BLEUUID(sUUID)),
+      charUUID(BLEUUID(cUUID)),
+      targetDeviceName(deviceName),
+      client(nullptr),
+      remoteChar(nullptr)
+    {
+        client = BLEDevice::createClient();
+    }
+
+    bool connect() {
+        if (client->isConnected()) {
+            Serial.println("Already connected.");
+            return true;
         }
 
-        bool connect() {
-            if (client->isConnected()) {
-                Serial.println("Already connected to NanoBLE.");
-                return true;
+        Serial.println("Not connected, scanning for devices...");
+        BLEScan* scan = BLEDevice::getScan();
+        scan->setActiveScan(true); 
+        BLEScanResults results = scan->start(5); 
+
+        bool foundDevice = false;
+        BLEAdvertisedDevice targetAdvDevice;
+
+        for (int i = 0; i < results.getCount(); i++) {
+            BLEAdvertisedDevice device = results.getDevice(i);
+            String devName = device.getName().c_str();
+            Serial.print("Found device: ");
+            Serial.println(devName);
+
+            if (devName == "NanoBLE") {
+                Serial.println("Found NanoBLE, attempting to connect...");
+                targetAdvDevice = device;
+                foundDevice = true;
+                break;
             }
+        }
 
-            Serial.println("Not connected, scanning for devices...");
-            BLEScan* scan = BLEDevice::getScan();
-            scan->setActiveScan(true);
-            BLEScanResults results = scan->start(5, false); // Scan for 5 seconds
+        scan->clearResults();
 
-            bool foundDevice = false;
+        if (!foundDevice) {
+            Serial.println("Failed to find NanoBLE.");
+            return false;
+        }
 
-            for (int i = 0; i < results.getCount(); i++) {
-                BLEAdvertisedDevice device = results.getDevice(i);
-                const char* deviceName = device.getName().c_str();
+        if (client->connect(&targetAdvDevice)) {
+            Serial.println("Connected to NanoBLE.");
 
-                if (deviceName && String(deviceName) == "NanoBLE") {
-                    Serial.println("Found NanoBLE, attempting to connect...");
-                    if (client->connect(&device)) {
-                        foundDevice = true;
-                        break;
-                    } else {
-                        Serial.println("Failed to connect to device.");
-                    }
-                }
-            }
-
-            scan->clearResults();
-
-            if (foundDevice && client->isConnected()) {
-                Serial.println("Connected to NanoBLE.");
-
-                BLERemoteService* remoteService = client->getService(serviceUUID);
-                if (remoteService == nullptr) {
-                    Serial.println("Failed to find our service UUID.");
-                    client->disconnect();
-                    return false;
-                }
-
-                remoteChar = remoteService->getCharacteristic(charUUID);
-                if (remoteChar == nullptr) {
-                    Serial.println("Failed to find our characteristic UUID.");
-                    client->disconnect();
-                    return false;
-                }
-
-                Serial.println("Found characteristic successfully.");
-                return true;
-            } else {
-                Serial.println("Failed to find or connect to NanoBLE.");
+            BLERemoteService* remoteService = client->getService(serviceUUID);
+            if (remoteService == nullptr) {
+                Serial.println("Failed to find our service UUID.");
+                client->disconnect();
                 return false;
             }
-        }
 
-        void disconnect() {
-            if (client->isConnected()) {
+            remoteChar = remoteService->getCharacteristic(charUUID);
+            if (remoteChar == nullptr) {
+                Serial.println("Failed to find our characteristic UUID.");
                 client->disconnect();
-                Serial.println("Disconnected from NanoBLE.");
+                return false;
             }
-        }
 
-        bool isConnected() {
-            return client->isConnected();
+            Serial.println("Found characteristic successfully.");
+            return true;
+        } else {
+            Serial.println("Failed to connect to NanoBLE.");
+            return false;
         }
+    }
+
+    void disconnect() {
+        if (client && client->isConnected()) {
+            client->disconnect();
+            Serial.println("Disconnected from NanoBLE.");
+        }
+    }
+
+    bool isConnected() {
+        return client && client->isConnected();
+    }
+
+    uint8_t readValue() {
+        if (remoteChar && remoteChar->canRead()) {
+            return remoteChar->readUInt8();
+        }
+        return 0;
+    }
 };

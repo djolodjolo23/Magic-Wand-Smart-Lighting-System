@@ -19,6 +19,7 @@ void loop() {
     Serial.println("Not connected, scanning for devices..."); // attempt to connect to NanoBLE
     BLEScan* scan = BLEDevice::getScan();
     scan->setActiveScan(true); // active scan uses more power, but get results faster
+    
     BLEScanResults results = scan->start(5);
 
     bool foundDevice = false;

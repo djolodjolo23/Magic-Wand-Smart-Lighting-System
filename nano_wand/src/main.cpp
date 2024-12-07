@@ -4,37 +4,38 @@
 
 SF fusion;
 
-float gx, gy, gz, ax, ay, az, mx, my, mz;
-
-
+float gx, gy, gz, ax, ay, az;
 float pitch, roll, yaw;
 float deltat;
 
 static float previousRoll = 0.0f;
 
-const float ROLL_THRESHOLD = 5.0f;          // threshold for roll
-const float PITCH_SPIKE_THRESHOLD = 17.0f; // spike threshold 
-const float YAW_SPIKE_THRESHOLD = 17.0f;   // spike threshold
+const float ROLL_THRESHOLD = 1.0f;          
+const float PITCH_SPIKE_THRESHOLD = 17.0f;  
+const float YAW_SPIKE_THRESHOLD = 17.0f;   
 
-const int BUFFER_SIZE = 10; 
-float pitchBuffer[BUFFER_SIZE] = {0}; // for checking pitch spikes
-float yawBuffer[BUFFER_SIZE] = {0}; // for checking yaw spikes
+const int BUFFER_SIZE = 10;
+float pitchBuffer[BUFFER_SIZE] = {0};
+float yawBuffer[BUFFER_SIZE] = {0};
 int bufferIndex = 0;
 
-const unsigned long COOLDOWN_TIME = 600;
+const int STABLE_READING_COUNT = 20;  // Need 20 stable readings
+const int STABLE_READING_THRESHOLD = 2;
+
+int stableReadings = 0;
+int lastBrightness = 50;
+
+bool inRollMode = false;  
+const unsigned long EVENT_COOLDOWN = 500;
 unsigned long lastEventTime = 0;
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial) {
-    ;  
-  }
+  while (!Serial) { ; }
 
   if (!IMU.begin()) {
     Serial.println("IMU initialization unsuccessful");
-    while (1) {
-      ;  
-    }
+    while (1) { ; }
   } else {
     Serial.println("IMU initialized successfully");
   }
@@ -55,7 +56,6 @@ void loop() {
     gz *= DEG_TO_RAD;
 
     deltat = fusion.deltatUpdate();
-    //fusion.MadgwickUpdate(gx, gy, gz, ax, ay, az, deltat);
     fusion.MahonyUpdate(gx, gy, gz, ax, ay, az, deltat);
 
     roll = fusion.getRoll();
@@ -65,45 +65,84 @@ void loop() {
     pitchBuffer[bufferIndex] = pitch;
     yawBuffer[bufferIndex] = yaw;
 
-    float rollDifference = roll - previousRoll;
-    float pitchChange = pitch - pitchBuffer[(bufferIndex + 1) % BUFFER_SIZE];
-    float yawChange = yaw - yawBuffer[(bufferIndex + 1) % BUFFER_SIZE];
-
     unsigned long currentTime = millis();
 
-    if (abs(rollDifference) > ROLL_THRESHOLD && (currentTime - lastEventTime > COOLDOWN_TIME)) {
-      if (rollDifference > 0) {
-        Serial.println("ROLL LEFT");
-      } else {
-        Serial.println("ROLL RIGHT");
-      }
-      lastEventTime = currentTime;
+    
+    float rollDiff = abs(roll - previousRoll);
+    float pitchDiff = abs(pitch - pitchBuffer[(bufferIndex + 1) % BUFFER_SIZE]);
+    float yawDiff = abs(yaw - yawBuffer[(bufferIndex + 1) % BUFFER_SIZE]);
+
+    // finding the dominant axis to trigger the event
+    float maxDiff = rollDiff;
+    char dominantAxis = 'R'; // R for Roll, P for Pitch, Y for Yaw
+
+    if (pitchDiff > maxDiff) {
+      maxDiff = pitchDiff;
+      dominantAxis = 'P';
+    }
+    if (yawDiff > maxDiff) {
+      maxDiff = yawDiff;
+      dominantAxis = 'Y';
     }
 
-    if (abs(pitchChange) > PITCH_SPIKE_THRESHOLD && (currentTime - lastEventTime > COOLDOWN_TIME)) {
-      if (pitchChange > 0) {
-        Serial.println("UP");
-      } else {
-        Serial.println("DOWN");
+    if (!inRollMode) {
+      // only trigger if cooldown has passed
+      if ((currentTime - lastEventTime > EVENT_COOLDOWN)) {
+        // roll mode triggered
+        if (dominantAxis == 'R' && maxDiff > ROLL_THRESHOLD) {
+          inRollMode = true;
+          // Serial.println("Entering roll mode...");
+          lastEventTime = currentTime;
+        } else if (dominantAxis == 'P' && maxDiff > PITCH_SPIKE_THRESHOLD) {
+        // Pitch trigger
+          if (pitch > pitchBuffer[(bufferIndex + 1) % BUFFER_SIZE]) {
+            Serial.println("UP");
+          } else {
+            Serial.println("DOWN");
+          }
+          lastEventTime = currentTime;
+        } else if (dominantAxis == 'Y' && maxDiff > YAW_SPIKE_THRESHOLD) {
+          // Yaw trigger
+          if (yaw > yawBuffer[(bufferIndex + 1) % BUFFER_SIZE]) {
+            Serial.println("LEFT");
+          } else {
+            Serial.println("RIGHT");
+          }
+          lastEventTime = currentTime;
+        }
       }
-      lastEventTime = currentTime;
     }
 
-    if (abs(yawChange) > YAW_SPIKE_THRESHOLD && (currentTime - lastEventTime > COOLDOWN_TIME)) {
-      if (yawChange > 0) {
-        Serial.println("LEFT");
+    // If in roll mode, continuously map roll angle to brightness
+    if (inRollMode) {
+       // -90 to 90 degrees mapped to 0 to 100 brightness
+      // 0 degrees is neutral
+      // 90 degrees is min brightness
+      // -90 degrees is max brightness
+      // current roll, which can be between -90 and 90 degrees, divided 
+      int brightness = (int)(((90.0 - roll) / 180.0) * 100.0); 
+      // constrain brightness to 0-100
+      brightness = constrain(brightness, 0, 100);
+
+      Serial.println(brightness);
+
+      // exit check, if brightness is stable for 20 readings
+      if (abs(brightness - lastBrightness) <= STABLE_READING_THRESHOLD) {
+        stableReadings++;
       } else {
-        Serial.println("RIGHT");
+        stableReadings = 0; 
       }
-      lastEventTime = currentTime;
+        // exit in case of stable readings
+      if (stableReadings >= STABLE_READING_COUNT) {
+        inRollMode = false;
+        // Serial.println("Exiting roll mode...");
+      }
+
+      lastBrightness = brightness;
     }
 
     previousRoll = roll;
     bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
-
-    // Debug
-    //Serial << "Pitch:\t" << pitch << "\tRoll:\t" << roll << "\tYaw:\t" << yaw << endl;
-
-    delay(20); 
+    delay(20);
   }
 }

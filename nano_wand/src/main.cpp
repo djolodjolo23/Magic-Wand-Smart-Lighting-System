@@ -19,14 +19,15 @@ float pitchBuffer[BUFFER_SIZE] = {0};
 float yawBuffer[BUFFER_SIZE] = {0};
 int bufferIndex = 0;
 
-const int STABLE_READING_COUNT = 20;  // Need 20 stable readings
+const int STABLE_READING_COUNT = 35; 
 const int STABLE_READING_THRESHOLD = 2;
 
 int stableReadings = 0;
 int lastBrightness = 50;
 
 bool inRollMode = false;  
-const unsigned long EVENT_COOLDOWN = 500;
+const unsigned long EVENT_COOLDOWN = 300;
+const unsigned long ROLL_MODE_TIMEOUT = 1000;
 unsigned long lastEventTime = 0;
 
 void setup() {
@@ -89,7 +90,7 @@ void loop() {
       // only trigger if cooldown has passed
       if ((currentTime - lastEventTime > EVENT_COOLDOWN)) {
         // roll mode triggered
-        if (dominantAxis == 'R' && maxDiff > ROLL_THRESHOLD) {
+        if (dominantAxis == 'R' && maxDiff > ROLL_THRESHOLD && (currentTime - lastEventTime > ROLL_MODE_TIMEOUT)) {
           inRollMode = true;
           // Serial.println("Entering roll mode...");
           lastEventTime = currentTime;

@@ -1,9 +1,9 @@
 
 #include <ArduinoBLE.h>
 #include "BluetoothPeripheral.hpp"
-#include <MotionHandler.hpp>
+#include "MotionHandler.hpp"
+#include "IRControl.hpp"
 
-uint8_t value = 0;
 
 BluetoothPeripheral btPeripheral(
     "18cfb27c-df3d-41c7-801b-60165e9c9872",  // Service UUID
@@ -11,6 +11,7 @@ BluetoothPeripheral btPeripheral(
     "NanoBLE"                              // Device Name
 );
 
+IRControl irControl(25, 3);
 MotionHandler motionHandler;
 
 void setup() {
@@ -19,6 +20,7 @@ void setup() {
         while (1);
     }
     //motionHandler.init();
+    irControl.init();
 }
 
 void loop() {
@@ -30,6 +32,8 @@ void loop() {
 
     //value = (value % 10) + 1;
     //delay(1000);
+
+    irControl.update();
 
     //String motion = motionHandler.processMotion();
     //if (motion != "") {

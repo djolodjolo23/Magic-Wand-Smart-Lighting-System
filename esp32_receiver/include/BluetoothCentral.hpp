@@ -32,8 +32,8 @@ public:
 
         Serial.println("Not connected, scanning for devices...");
         BLEScan* scan = BLEDevice::getScan();
-        scan->setActiveScan(true); 
-        BLEScanResults results = scan->start(5); 
+        scan->setActiveScan(true); // active scan
+        BLEScanResults results = scan->start(5); // scan for 5 seconds
 
         bool foundDevice = false;
         BLEAdvertisedDevice targetAdvDevice;
@@ -59,6 +59,7 @@ public:
             return false;
         }
 
+        // Attempt to connect to the device
         if (client->connect(&targetAdvDevice)) {
             Serial.println("Connected to NanoBLE.");
 
@@ -95,6 +96,7 @@ public:
         return client && client->isConnected();
     }
 
+    // Example read method
     uint8_t readValue() {
         if (remoteChar && remoteChar->canRead()) {
             return remoteChar->readUInt8();

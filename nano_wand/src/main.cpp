@@ -11,6 +11,8 @@ BluetoothPeripheral btPeripheral(
     "NanoBLE"                              // Device Name
 );
 
+int value = 0;
+
 IRControl irControl(25, 3);
 MotionHandler motionHandler;
 
@@ -20,20 +22,20 @@ void setup() {
         while (1);
     }
     //motionHandler.init();
-    irControl.init();
+    //irControl.init();
 }
 
 void loop() {
-    //btPeripheral.handleConnection();
-    //btPeripheral.updateValue(value);
+    btPeripheral.handleConnection();
+    btPeripheral.updateValue(value);
 
-    //Serial.print("Updating value to: ");
-    //Serial.println(value);
+    Serial.print("Updating value to: ");
+    Serial.println(value);
 
-    //value = (value % 10) + 1;
-    //delay(1000);
+    value = (value % 10) + 1;
+    delay(1000);
 
-    irControl.update();
+    //irControl.update();
 
     //String motion = motionHandler.processMotion();
     //if (motion != "") {

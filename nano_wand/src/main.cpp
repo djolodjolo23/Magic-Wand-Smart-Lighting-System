@@ -3,6 +3,7 @@
 #include "BluetoothPeripheral.hpp"
 #include "MotionHandler.hpp"
 #include "IRControl.hpp"
+#include "RgbLed.hpp"
 
 
 BluetoothPeripheral btPeripheral(
@@ -26,7 +27,14 @@ void setup() {
 }
 
 void loop() {
-    btPeripheral.handleConnection();
+    long previousMillis = millis(); 
+    const long interval = 1000;     
+    while (!btPeripheral.isConnectedToCentral()) {
+        if (millis() - previousMillis >= interval) {
+            previousMillis = millis();
+            Serial.println("Waiting for connection...");
+        }
+    }
     btPeripheral.updateValue(value);
 
     Serial.print("Updating value to: ");

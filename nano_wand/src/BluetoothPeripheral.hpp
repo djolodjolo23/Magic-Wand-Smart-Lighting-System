@@ -36,14 +36,8 @@ class BluetoothPeripheral {
         void updateValue(uint8_t value) {
             characteristic.writeValue(value);
         }
-        
-        void handleConnection() {
-            BLEDevice central = BLE.central();
-            if (central && !central.connected()) {
-                Serial.print("Connected to central: ");
-                Serial.println(central.address());
-            } else if (!central) {
-                Serial.println("Not connected...");
-            }
+
+        bool isConnectedToCentral() {
+            return BLE.connected();
         }
 };

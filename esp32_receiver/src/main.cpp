@@ -10,7 +10,6 @@ IRReceive irReceiver(32, 33);
 
 void setup() {
   Serial.begin(9600);
-  delay(2000);
   Serial.println("Starting...");
   //BLEDevice::init("ESP32_Central");
 }

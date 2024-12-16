@@ -27,23 +27,23 @@ void setup() {
 }
 
 void loop() {
-    long previousMillis = millis(); 
-    const long interval = 1000;     
-    while (!btPeripheral.isConnectedToCentral()) {
-        if (millis() - previousMillis >= interval) {
-            previousMillis = millis();
-            Serial.println("Waiting for connection...");
-        }
-    }
-    btPeripheral.updateValue(value);
+    // long previousMillis = millis(); 
+    // const long interval = 1000;     
+    // while (!btPeripheral.isConnectedToCentral()) {
+    //     if (millis() - previousMillis >= interval) {
+    //         previousMillis = millis();
+    //         Serial.println("Waiting for connection...");
+    //     }
+    // }
+    // btPeripheral.updateValue(value);
 
-    Serial.print("Updating value to: ");
-    Serial.println(value);
+    // Serial.print("Updating value to: ");
+    // Serial.println(value);
 
-    value = (value % 10) + 1;
-    delay(1000);
+    // value = (value % 10) + 1;
+    // delay(1000);
 
-    //irControl.update();
+    irControl.update();
 
     //String motion = motionHandler.processMotion();
     //if (motion != "") {

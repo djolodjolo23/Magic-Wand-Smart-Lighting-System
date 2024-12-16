@@ -59,7 +59,6 @@ public:
             return false;
         }
 
-        // Attempt to connect to the device
         if (client->connect(&targetAdvDevice)) {
             Serial.println("Connected to NanoBLE.");
 
@@ -96,7 +95,6 @@ public:
         return client && client->isConnected();
     }
 
-    // Example read method
     uint8_t readValue() {
         if (remoteChar && remoteChar->canRead()) {
             return remoteChar->readUInt8();

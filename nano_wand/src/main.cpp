@@ -4,6 +4,7 @@
 #include "MotionHandler.hpp"
 #include "RgbLed.hpp"
 #include "IRControl.hpp"
+#include "IRremote.hpp"
 
 BluetoothPeripheral btPeripheral(
     "1c0e6984-77ac-4a2c-88d0-0331c44c9b32",  // Service UUID
@@ -14,8 +15,8 @@ BluetoothPeripheral btPeripheral(
 int value = 0;
 
 IRControl irControl(25, 3);
-RgbLed rgbLed(16, 19, 20);
-MotionHandler motionHandler;
+//RgbLed rgbLed(16, 19, 20);
+//MotionHandler motionHandler;
 
 void setup() {
     Serial.begin(115200);
@@ -27,25 +28,25 @@ void setup() {
 }
 
 void loop() {
-    long previousMillis = millis(); 
-    const long interval = 1000;     
-    while (!btPeripheral.isConnectedToCentral()) {
-        if (millis() - previousMillis >= interval) {
-            previousMillis = millis();
-            //rgbLed.turnOnRed();
-            Serial.println("Waiting for connection...");
-        }
-        //rgbLed.turnOff();
-    }
-    btPeripheral.updateValue(value);
+    // long previousMillis = millis(); 
+    // const long interval = 1000;     
+    // while (!btPeripheral.isConnectedToCentral()) {
+    //     if (millis() - previousMillis >= interval) {
+    //         previousMillis = millis();
+    //         //rgbLed.turnOnRed();
+    //         Serial.println("Waiting for connection...");
+    //     }
+    //     //rgbLed.turnOff();
+    // }
+    // btPeripheral.updateValue(value);
 
-    Serial.print("Updating value to: ");
-    Serial.println(value);
+    // Serial.print("Updating value to: ");
+    // Serial.println(value);
 
-    value = (value % 10) + 1;
-    delay(1000);
+    // value = (value % 10) + 1;
+    //delay(1000);
 
-    //irControl.update();
+    irControl.update();
 
     //String motion = motionHandler.processMotion();
     //if (motion != "") {

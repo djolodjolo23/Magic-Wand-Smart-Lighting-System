@@ -23,6 +23,7 @@
 
 # SETUP
 
+- In the Fritzzing sketch, ignore the location Red Yellow and Green leds for now, you can put them at any GPIO you prefer.
 ![Arduino Nano](setup/462654276_1278896806492256_4236363441239698132_n.jpg)
 ![Arduino Nano](setup/Screenshot%20from%202024-12-17%2017-19-49.png)
 ![ESP32](setup/465396496_1134093258374001_1274934838957421194_n.jpg)

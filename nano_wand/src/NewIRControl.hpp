@@ -2,8 +2,7 @@
 
 #include <Arduino.h>
 
-// Try enabling hardware timer or software PWM mode for IRremote
-#define SEND_PWM_BY_TIMER
+// a class for testing the IRremote library, which might be needed in case we have to use ble sense for the final project
 #include <IRremote.hpp>
 
 class NewIRControl {
@@ -18,15 +17,16 @@ class NewIRControl {
 
         void init() {
             pinMode(BUTTON_PIN, INPUT_PULLUP);
-            // Let IrSender handle pin mode
             IrSender.begin(IR_LED_PIN);
+            disableLEDFeedback();
         }
 
         void update() {
+            uint8_t sCommand = 0x34;
+            uint8_t sRepeats = 0;
             if (digitalRead(BUTTON_PIN) == LOW) {
                 Serial.println("Button pressed, sending IR code");
-                // Try a standard NEC code
-                IrSender.sendNEC(0x00FF00FF, 32);
+                IrSender.sendNEC(0x00, sCommand, sRepeats);
                 delay(200);
             }
         }

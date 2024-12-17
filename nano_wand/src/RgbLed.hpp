@@ -14,14 +14,14 @@ class RgbLed {
               yellowPin(yellow) 
         {
             pinMode(redPin, OUTPUT);
-            // pinMode(greenPin, OUTPUT);
-            // pinMode(yellowPin, OUTPUT);
+            pinMode(greenPin, OUTPUT);
+            pinMode(yellowPin, OUTPUT);
         }
 
         void turnOnRed() {
             digitalWrite(redPin, HIGH);
-            // digitalWrite(greenPin, LOW);
-            // digitalWrite(yellowPin, LOW);
+            digitalWrite(greenPin, LOW);
+            digitalWrite(yellowPin, LOW);
         }
 
         void turnOnGreen() {
@@ -38,7 +38,8 @@ class RgbLed {
 
         void turnOff() {
             digitalWrite(redPin, LOW);
-            // digitalWrite(greenPin, LOW);
-            // digitalWrite(yellowPin, LOW);
+            digitalWrite(greenPin, LOW);
+            digitalWrite(yellowPin, LOW);
         }
+        
 };

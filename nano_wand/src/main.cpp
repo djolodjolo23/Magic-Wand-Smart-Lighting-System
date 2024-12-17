@@ -14,7 +14,8 @@ BluetoothPeripheral btPeripheral(
 
 int value = 0;
 
-IRControl irControl(25, 3);
+//IRControl irControl(25, 3);
+
 //RgbLed rgbLed(16, 19, 20);
 //MotionHandler motionHandler;
 
@@ -24,29 +25,29 @@ void setup() {
         while (1);
     }
     //motionHandler.init();
-    irControl.init();
+    //irControl.init();
 }
 
 void loop() {
-    // long previousMillis = millis(); 
-    // const long interval = 1000;     
-    // while (!btPeripheral.isConnectedToCentral()) {
-    //     if (millis() - previousMillis >= interval) {
-    //         previousMillis = millis();
-    //         //rgbLed.turnOnRed();
-    //         Serial.println("Waiting for connection...");
-    //     }
-    //     //rgbLed.turnOff();
-    // }
-    // btPeripheral.updateValue(value);
+    long previousMillis = millis(); 
+    const long interval = 1000;     
+    while (!btPeripheral.isConnectedToCentral()) {
+        if (millis() - previousMillis >= interval) {
+            previousMillis = millis();
+            //rgbLed.turnOnRed();
+            Serial.println("Waiting for connection...");
+        }
+        //rgbLed.turnOff();
+    }
+    btPeripheral.updateValue(value);
 
-    // Serial.print("Updating value to: ");
-    // Serial.println(value);
+    Serial.print("Updating value to: ");
+    Serial.println(value);
 
-    // value = (value % 10) + 1;
-    //delay(1000);
+    value = (value % 10) + 1;
+    delay(1000);
 
-    irControl.update();
+    //irControl.update();
 
     //String motion = motionHandler.processMotion();
     //if (motion != "") {

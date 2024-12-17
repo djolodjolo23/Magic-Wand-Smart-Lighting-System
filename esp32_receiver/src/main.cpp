@@ -19,6 +19,5 @@ void loop() {
     uint8_t value = btCentral.readValue();
     Serial.print("Received: ");
     Serial.println(value);
-    delay(1000);
   }
 }

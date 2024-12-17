@@ -21,7 +21,9 @@ public:
       client(nullptr),
       remoteChar(nullptr)
     {
+        BLEDevice::setPower(ESP_PWR_LVL_P9);
         client = BLEDevice::createClient();
+        BLEDevice::setPower(ESP_PWR_LVL_P9);
     }
 
     bool connect() {

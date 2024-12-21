@@ -7,7 +7,7 @@ private:
     int greenLedPin;
     unsigned long previousMillis;
 public:
-    const long interval = 100;
+    const long interval = 5;
     IRReceive(int irReceiverPin, int greenLedPin)
     : irReceiverPin(irReceiverPin), greenLedPin(greenLedPin) 
     {
@@ -26,7 +26,7 @@ public:
             } else {
                 digitalWrite(greenLedPin, HIGH);
             }
-            previousMillis = currentMillis; // Update the timestamp
+            previousMillis = currentMillis;
         }
     }
 };

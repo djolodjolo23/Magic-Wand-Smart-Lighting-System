@@ -16,7 +16,7 @@ void setup() {
 
 void loop() {
   unsigned long previousMillis = millis();
-  const long interval = 1000;
+  const long interval = 300;
   while (!btCentral.isConnected()) {
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= interval) {

@@ -29,9 +29,9 @@ class IrControlBleSense {
         void update() {
             if (digitalRead(BUTTON_PIN) == LOW) {
                 pwm->write(0.5f);
-                delay(150);
+                delay(50);
                 pwm->write(0.0f);
-                delay(150);
+                delay(50);
             } else {
                 pwm->write(0.0f);
             }

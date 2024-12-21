@@ -4,32 +4,29 @@
 class IRReceive {
 private:
     int irReceiverPin;
-    int greednLedPin;
+    int greenLedPin;
+    unsigned long previousMillis;
 public:
-    IRReceive(int irReceiverPin, int greednLedPin)
-    : irReceiverPin(irReceiverPin), greednLedPin(greednLedPin) 
+    const long interval = 100;
+    IRReceive(int irReceiverPin, int greenLedPin)
+    : irReceiverPin(irReceiverPin), greenLedPin(greenLedPin) 
     {
         pinMode(irReceiverPin, INPUT);
-        pinMode(greednLedPin, OUTPUT);
+        pinMode(greenLedPin, OUTPUT);
     }
 
-    void listenForIR() 
-    {
-        unsigned long previousMillis = millis();
-        const long interval = 100;
-        while (true) {
-            unsigned long currentMillis = millis();
-            if (currentMillis - previousMillis >= interval) {
-                int receiverState = digitalRead(irReceiverPin);
-                Serial.print("IR Receiver Output: ");
-                Serial.println(receiverState);
-                if (receiverState == HIGH) {
-                    digitalWrite(greednLedPin, LOW);
-                } else {
-                    digitalWrite(greednLedPin, HIGH);
-                }
-                previousMillis = currentMillis;
+    void listenForIR() {
+        unsigned long currentMillis = millis();
+        if (currentMillis - previousMillis >= interval) {
+            int receiverState = digitalRead(irReceiverPin);
+            Serial.print("IR Receiver Output: ");
+            Serial.println(receiverState);
+            if (receiverState == HIGH) {
+                digitalWrite(greenLedPin, LOW);
+            } else {
+                digitalWrite(greenLedPin, HIGH);
             }
+            previousMillis = currentMillis; // Update the timestamp
         }
     }
 };

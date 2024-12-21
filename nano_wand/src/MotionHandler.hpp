@@ -1,6 +1,7 @@
 #pragma once
 
-#include <Arduino_LSM6DS3.h>
+//#include <Arduino_LSM6DS3.h> // for rp2040 connect
+#include <Arduino_LSM9DS1.h> // for ble sense
 #include "Streaming.h"
 #include "SensorFusion.h"
 

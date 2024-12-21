@@ -84,6 +84,7 @@ public:
         }
     }
 
+
     void disconnect() {
         if (client && client->isConnected()) {
             client->disconnect();

@@ -15,6 +15,7 @@ void setup() {
 }
 
 void loop() {
+  unsigned long start = millis();
   unsigned long previousMillis = millis();
   const long interval = 1000;
   while (!btCentral.isConnected()) {
@@ -25,11 +26,8 @@ void loop() {
       previousMillis = currentMillis;
     }
   }
-  Serial.println("Connected!");
-  uint8_t val = btCentral.readValue();
-  Serial.println(val);
-  
+
   irReceiver.listenForIR();
-  delay(20);
+  //delay(20);
   
 }

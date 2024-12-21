@@ -7,6 +7,11 @@ class RgbLed {
         const int redPin;
         const int greenPin;
         const int yellowPin;
+
+        bool redPinState = false;
+        bool greenPinState = false;
+        bool yellowPinState = false;
+
     public:
         RgbLed(int red, int green, int yellow)
             : redPin(red),
@@ -34,6 +39,28 @@ class RgbLed {
             digitalWrite(redPin, LOW);
             digitalWrite(greenPin, LOW);
             digitalWrite(yellowPin, HIGH);
+        }
+
+        void blinkRed(long interval) {
+            digitalWrite(redPin, HIGH);
+            digitalWrite(greenPin, LOW);
+            digitalWrite(yellowPin, LOW);
+            delay(interval);
+            digitalWrite(redPin, LOW);
+            delay(interval);
+        }
+
+        void blinkRedNonBlocking(long startTime, long interval) {
+            long currentMilis = millis();
+            if (currentMilis - startTime >= interval) {
+                if (redPinState) {
+                    digitalWrite(redPin, LOW);
+                    redPinState = false;
+                } else {
+                    digitalWrite(redPin, HIGH);
+                    redPinState = true;
+                }
+            }
         }
 
         void turnOff() {

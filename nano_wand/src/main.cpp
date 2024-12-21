@@ -2,10 +2,9 @@
 #include <ArduinoBLE.h>
 #include "BluetoothPeripheral.hpp"
 #include "MotionHandler.hpp"
-//#include "RgbLed.hpp"
-//#include "IRControl.hpp"
-//#include "IRremote.hpp"
-#include "IRControlBleSense.hpp"
+#include "RgbLed.hpp"
+//#include "IRControl.hpp" // for rp2040 connect
+#include "IRControlBleSense.hpp" // for ble sense
 
 BluetoothPeripheral btPeripheral(
     "1c0e6984-77ac-4a2c-88d0-0331c44c9b32",  // Service UUID
@@ -17,7 +16,7 @@ BluetoothPeripheral btPeripheral(
 
 IrControlBleSense irControlBleSense(2, 3); // for ble sense
 
-//RgbLed rgbLed(16, 19, 20);
+RgbLed rgbLed(14, 19, 20);
 
 MotionHandler motionHandler;
 
@@ -32,23 +31,19 @@ void setup() {
 }
 
 void loop() {
+    long startTime = millis();
     long previousMillis = millis(); 
     const long interval = 1000;     
     while (!btPeripheral.isConnectedToCentral()) {
+        rgbLed.blinkRed(150);
         if (millis() - previousMillis >= interval) {
             previousMillis = millis();
             //rgbLed.turnOnRed();
+            rgbLed.blinkRedNonBlocking(startTime, 150);
             Serial.println("Waiting for connection...");
         }
         //rgbLed.turnOff();
     }
-    // btPeripheral.updateValue(value);
-
-    // Serial.print("Updating value to: ");
-    // Serial.println(value);
-
-    // value = (value % 10) + 1;
-    // delay(1000);
 
     //irControl.update();
     irControlBleSense.update();

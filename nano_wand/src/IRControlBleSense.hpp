@@ -5,15 +5,13 @@
 class IrControlBleSense {
     private:
         const int IR_LED_PIN;
-        const int BUTTON_PIN;
         mbed::PwmOut *pwm;
 
     public:
-        IrControlBleSense(int IrLedPin, int ButtonPin)
-            : IR_LED_PIN(IrLedPin), BUTTON_PIN(ButtonPin), pwm(NULL) {}
+        IrControlBleSense(int IrLedPin)
+            : IR_LED_PIN(IrLedPin), pwm(NULL) {}
 
         void init() {
-            pinMode(BUTTON_PIN, INPUT_PULLUP);
 
             // Convert Arduino pin to an Mbed PinName
             PinName pinName = digitalPinToPinName(IR_LED_PIN);
@@ -27,13 +25,9 @@ class IrControlBleSense {
         }
 
         void update() {
-            if (digitalRead(BUTTON_PIN) == LOW) {
-                pwm->write(0.5f);
-                delay(50);
-                pwm->write(0.0f);
-                delay(50);
-            } else {
-                pwm->write(0.0f);
-            }
+            pwm->write(0.5f);
+            delay(50);
+            pwm->write(0.0f);
+            delay(50);
         }
 };

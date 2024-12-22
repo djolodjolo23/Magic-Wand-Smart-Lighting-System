@@ -12,8 +12,10 @@ BluetoothPeripheral btPeripheral(
     "NanoBLE"                              // Device Name
 );
 
+const int BUTTON_PIN = 3;
+
 //IRControl irControl(25, 3); // for rp2040 connect
-IrControlBleSense irControlBleSense(2, 3); // for ble sense
+IrControlBleSense irControlBleSense(2); // for ble sense
 
 RgbLed rgbLed(14, 16, 20);
 
@@ -24,6 +26,8 @@ void setup() {
     if (!btPeripheral.begin()) {
         while (1);
     }
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+
     motionHandler.init();
     //irControl.init();
     irControlBleSense.init();
@@ -36,28 +40,33 @@ void loop() {
         rgbLed.blinkRed(200);
         if (millis() - previousMillis >= interval) {
             previousMillis = millis();
-            //rgbLed.turnOnRed();
-            //rgbLed.blinkRedNonBlocking(startTime, 150);
             Serial.println("Waiting for connection...");
         }
-        //rgbLed.turnOff();
+    }
+
+    if (digitalRead(BUTTON_PIN) == LOW) {
+        rgbLed.blinkYellow(100);
+        irControlBleSense.update();
+        btPeripheral.updateValue(4);
+        btPeripheral.pool();
+        if (btPeripheral.ifCharacteristicWritten()) {
+            uint8_t value = btPeripheral.readValue();
+            if (value == 2) {
+                rgbLed.turnOnYellow();
+                rgbLed.turnOnRed();
+                Serial.println("Starting motion stream...");
+                while (1);
+            }
+        } else {
+            //rgbLed.blinkYellow(200);
+            rgbLed.blinkRed(200);
+        }
+    } else {
+
     }
 
     //irControl.update();
     //irControlBleSense.update();
-    btPeripheral.pool();
-
-    if (btPeripheral.ifCharacteristicWritten()) {
-        Serial.print("Received value: ");
-        uint8_t value = btPeripheral.readValue();
-        Serial.println(value);
-        rgbLed.turnOnRed();
-
-    } else {
-        //Serial.println("No value received");
-        rgbLed.turnOff();
-    }
-
     //String motion = motionHandler.processMotion();
     //if (motion != "") {
         //Serial.println(motion);

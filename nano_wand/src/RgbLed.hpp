@@ -31,19 +31,12 @@ class RgbLed {
 
         void turnOnRed() {
             digitalWrite(redPin, HIGH);
-            digitalWrite(greenPin, LOW);
-            digitalWrite(yellowPin, LOW);
         }
-
         void turnOnGreen() {
-            digitalWrite(redPin, LOW);
             digitalWrite(greenPin, HIGH);
-            digitalWrite(yellowPin, LOW);
         }
 
         void turnOnYellow() {
-            digitalWrite(redPin, LOW);
-            digitalWrite(greenPin, LOW);
             digitalWrite(yellowPin, HIGH);
         }
 

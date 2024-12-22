@@ -16,17 +16,19 @@ void setup() {
 
 void loop() {
   unsigned long previousMillis = millis();
-  const long interval = 300;
+  const long bleConnectionInterval = 300;
   while (!btCentral.isConnected()) {
     unsigned long currentMillis = millis();
-    if (currentMillis - previousMillis >= interval) {
+    if (currentMillis - previousMillis >= bleConnectionInterval) {
       Serial.println("Attempting to connect...");
       btCentral.connect();
       previousMillis = currentMillis;
     }
   }
 
-  irReceiver.listenForIR();
+  //irReceiver.listenForIR();
+  btCentral.writeValue(1);
   //delay(20);
+  delay(200);
   
 }

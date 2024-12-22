@@ -102,4 +102,15 @@ public:
         }
         return 0;
     }
+
+    bool writeValue(uint8_t val) {
+        if (remoteChar && remoteChar->canWrite()) {
+            remoteChar->writeValue(val, 1);
+            Serial.print("Wrote value: ");
+            Serial.println(val);
+            return true;
+        }
+        Serial.println("Characteristic not writable or not found.");
+        return false;
+    }
 };

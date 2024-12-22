@@ -6,6 +6,8 @@ private:
     int irReceiverPin;
     int greenLedPin;
     unsigned long previousMillis;
+    unsigned long bleSignalInterval = 5000;
+
 public:
     const long interval = 5;
     IRReceive(int irReceiverPin, int greenLedPin)

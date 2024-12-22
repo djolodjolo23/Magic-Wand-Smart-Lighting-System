@@ -33,11 +33,24 @@ class BluetoothPeripheral {
             return true;
         }
 
+        void pool() {
+            BLE.poll();
+        }
+
         void updateValue(uint8_t value) {
             characteristic.writeValue(value);
         }
 
+        bool ifCharacteristicWritten() {
+            return characteristic.written();
+        }
+
+
         bool isConnectedToCentral() {
             return BLE.connected();
+        }
+
+        uint8_t readValue() {
+            return characteristic.value();
         }
 };

@@ -13,10 +13,9 @@ BluetoothPeripheral btPeripheral(
 );
 
 //IRControl irControl(25, 3); // for rp2040 connect
-
 IrControlBleSense irControlBleSense(2, 3); // for ble sense
 
-RgbLed rgbLed(14, 19, 20);
+RgbLed rgbLed(14, 16, 20);
 
 MotionHandler motionHandler;
 
@@ -31,22 +30,33 @@ void setup() {
 }
 
 void loop() {
-    long startTime = millis();
     long previousMillis = millis(); 
     const long interval = 1000;     
     while (!btPeripheral.isConnectedToCentral()) {
-        rgbLed.blinkRed(150);
+        rgbLed.blinkRed(200);
         if (millis() - previousMillis >= interval) {
             previousMillis = millis();
             //rgbLed.turnOnRed();
-            rgbLed.blinkRedNonBlocking(startTime, 150);
+            //rgbLed.blinkRedNonBlocking(startTime, 150);
             Serial.println("Waiting for connection...");
         }
         //rgbLed.turnOff();
     }
 
     //irControl.update();
-    irControlBleSense.update();
+    //irControlBleSense.update();
+    btPeripheral.pool();
+
+    if (btPeripheral.ifCharacteristicWritten()) {
+        Serial.print("Received value: ");
+        uint8_t value = btPeripheral.readValue();
+        Serial.println(value);
+        rgbLed.turnOnRed();
+
+    } else {
+        //Serial.println("No value received");
+        rgbLed.turnOff();
+    }
 
     //String motion = motionHandler.processMotion();
     //if (motion != "") {

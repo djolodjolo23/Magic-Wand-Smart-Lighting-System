@@ -54,8 +54,11 @@ void loop() {
                 Serial.println("Starting motion stream...");
                 while (true) {
                     leds.blinkAllSimultaneously(200);
+                    uint8_t currentMotion = motionHandler.processMotion();
+                    btPeripheral.updateValue(currentMotion);
                     if (digitalRead(BUTTON_PIN) == HIGH) {
                         leds.turnOff();
+                        delay(2000);
                         break;
                     }
                 }
@@ -66,6 +69,7 @@ void loop() {
         }
     } else {
         leds.turnOff();
+        btPeripheral.updateValue(105); // 105 for end of motion stream
     }
 
     //irControl.update();

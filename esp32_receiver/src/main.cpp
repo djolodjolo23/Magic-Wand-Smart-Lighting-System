@@ -28,8 +28,22 @@ void loop() {
 
   //irReceiver.listenForIR();
   uint8_t biggestVal = irReceiver.testFunc();
-  Serial.println(biggestVal);
   btCentral.writeValue(biggestVal);
+  // if (biggestVal > 0) {
+  //   while(true) {
+  //     uint8_t val = btCentral.readNewValue();
+  //     Serial.println(val);
+  //     if (val == 105) {
+  //       break;
+  //     }
+  //     delay(200);
+  //   }
+
+  // }
+  // while (true) {
+  //   uint8_t val = btCentral.readValue();
+  //   Serial.println(val);
+  // }
   //delay(20);
   delay(200);
   

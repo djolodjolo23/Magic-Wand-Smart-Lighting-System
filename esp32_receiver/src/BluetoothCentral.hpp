@@ -13,15 +13,34 @@ private:
     BLERemoteCharacteristic* remoteChar;
     String targetDeviceName;
 
+    static BluetoothCentral* instance;
+    bool newValueAvailable;
+    uint8_t lastReadValue;
+
+    static void notifyCallBack(
+        BLERemoteCharacteristic *characteristic,
+        uint8_t *data,
+        size_t length,
+        bool isNotify
+    ) {
+        if (instance && length > 0) {
+            instance->lastReadValue = data[0];
+            instance->newValueAvailable = true;
+        }
+    }
+
 public:
     BluetoothCentral(const char* sUUID, const char* cUUID, const char* deviceName)
     : serviceUUID(BLEUUID(sUUID)),
       charUUID(BLEUUID(cUUID)),
       targetDeviceName(deviceName),
       client(nullptr),
-      remoteChar(nullptr)
+      remoteChar(nullptr),
+      newValueAvailable(false),
+      lastReadValue(0)
     {
         client = BLEDevice::createClient();
+        instance = this;
     }
 
     bool connect() {
@@ -84,6 +103,14 @@ public:
         }
     }
 
+    uint8_t readNewValue() {
+        if (newValueAvailable) {
+            newValueAvailable = false; // Reset the flag
+            return lastReadValue;      // Return the new value
+        }
+        return 0; // No new value available
+    }
+
 
     void disconnect() {
         if (client && client->isConnected()) {
@@ -103,6 +130,7 @@ public:
         return 0;
     }
 
+
     bool writeValue(uint8_t val) {
         if (remoteChar && remoteChar->canWrite()) {
             remoteChar->writeValue(val, 1);
@@ -114,3 +142,5 @@ public:
         return false;
     }
 };
+
+BluetoothCentral* BluetoothCentral::instance = nullptr;

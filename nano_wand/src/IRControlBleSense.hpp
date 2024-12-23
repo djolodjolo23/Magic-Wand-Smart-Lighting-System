@@ -28,6 +28,6 @@ class IrControlBleSense {
             pwm->write(0.5f);
             delay(50);
             pwm->write(0.0f);
-            delay(50);
+            delay(5);
         }
 };

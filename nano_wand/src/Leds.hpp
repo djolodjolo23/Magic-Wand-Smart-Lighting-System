@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-class RgbLed {
+class Leds {
     private:
         const int redPin;
         const int greenPin;
@@ -16,17 +16,17 @@ class RgbLed {
         unsigned long greenPreviousMillis = 0;
         unsigned long yellowPreviousMillis = 0;
 
-        int array[3] = {redPin, yellowPin, greenPin};
+        unsigned long previousMillis = 0;
 
     public:
-        RgbLed(int red, int yellow, int green)
+        Leds(int red, int yellow, int green)
             : redPin(red),
               greenPin(green),
               yellowPin(yellow)
         {
-            for (int i = 0; i < 3; i++) {
-                pinMode(array[i], OUTPUT);
-            }
+            pinMode(redPin, OUTPUT);
+            pinMode(greenPin, OUTPUT);
+            pinMode(yellowPin, OUTPUT);
         }
 
         void turnOnRed() {
@@ -66,6 +66,43 @@ class RgbLed {
                 digitalWrite(yellowPin, yellowPinState ? HIGH : LOW);
             }
         }
+
+        void blinkAllSimultaneously(unsigned long interval) {
+            unsigned static long currentLed = 0;
+            unsigned long currentMillis = millis();
+
+            if (currentMillis - previousMillis >= interval) {
+                currentLed = (currentLed + 1) % 3;
+                previousMillis = currentMillis;
+            }
+
+            if (currentLed == 0) {
+                digitalWrite(redPin, HIGH);
+                digitalWrite(yellowPin, LOW);
+                digitalWrite(greenPin, LOW);
+            } else if (currentLed == 1) {
+                digitalWrite(redPin, LOW);
+                digitalWrite(yellowPin, HIGH);
+                digitalWrite(greenPin, LOW);
+            } else if (currentLed == 2) {
+                digitalWrite(redPin, LOW);
+                digitalWrite(yellowPin, LOW);
+                digitalWrite(greenPin, HIGH);
+            }
+        }
+
+        void blinkAllTogether(unsigned long interval) {
+            unsigned long currentMillis = millis();
+            static bool allPinsState = false;
+            if (currentMillis - previousMillis >= interval) {
+                previousMillis = currentMillis;
+                allPinsState = !allPinsState; 
+                digitalWrite(redPin, allPinsState ? HIGH : LOW);
+                digitalWrite(greenPin, allPinsState ? HIGH : LOW);
+                digitalWrite(yellowPin, allPinsState ? HIGH : LOW);
+            }
+        }
+        
 
         void turnOff() {
             digitalWrite(redPin, LOW);

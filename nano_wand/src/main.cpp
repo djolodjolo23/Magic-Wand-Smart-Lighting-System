@@ -2,7 +2,7 @@
 #include <ArduinoBLE.h>
 #include "BluetoothPeripheral.hpp"
 #include "MotionHandler.hpp"
-#include "RgbLed.hpp"
+#include "Leds.hpp"
 //#include "IRControl.hpp" // for rp2040 connect
 #include "IRControlBleSense.hpp" // for ble sense
 
@@ -17,7 +17,7 @@ const int BUTTON_PIN = 3;
 //IRControl irControl(25, 3); // for rp2040 connect
 IrControlBleSense irControlBleSense(2); // for ble sense
 
-RgbLed rgbLed(14, 16, 20);
+Leds leds(14, 16, 18);
 
 MotionHandler motionHandler;
 
@@ -29,15 +29,15 @@ void setup() {
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 
     motionHandler.init();
-    //irControl.init();
-    irControlBleSense.init();
+    //irControl.init(); // for rp2040 connect
+    irControlBleSense.init(); // for ble sense
 }
 
 void loop() {
     long previousMillis = millis(); 
     const long interval = 1000;     
     while (!btPeripheral.isConnectedToCentral()) {
-        rgbLed.blinkRed(200);
+        leds.blinkRed(200);
         if (millis() - previousMillis >= interval) {
             previousMillis = millis();
             Serial.println("Waiting for connection...");
@@ -45,24 +45,27 @@ void loop() {
     }
 
     if (digitalRead(BUTTON_PIN) == LOW) {
-        rgbLed.blinkYellow(100);
+        leds.blinkAllTogether(200);
         irControlBleSense.update();
-        btPeripheral.updateValue(4);
         btPeripheral.pool();
         if (btPeripheral.ifCharacteristicWritten()) {
             uint8_t value = btPeripheral.readValue();
             if (value == 2) {
-                rgbLed.turnOnYellow();
-                rgbLed.turnOnRed();
                 Serial.println("Starting motion stream...");
-                while (1);
+                while (true) {
+                    leds.blinkAllSimultaneously(200);
+                    if (digitalRead(BUTTON_PIN) == HIGH) {
+                        leds.turnOff();
+                        break;
+                    }
+                }
             }
         } else {
             //rgbLed.blinkYellow(200);
-            rgbLed.blinkRed(200);
+            //rgbLed.blinkRed(200);
         }
     } else {
-        rgbLed.turnOff();
+        leds.turnOff();
     }
 
     //irControl.update();

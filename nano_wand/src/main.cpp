@@ -72,6 +72,7 @@ void loop() {
                 }
             }
         } 
+        delay(20);
     } else {
         leds.turnOff();
         btPeripheral.updateValue(105); // 105 for end of motion stream

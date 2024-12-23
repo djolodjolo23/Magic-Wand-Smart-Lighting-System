@@ -31,29 +31,21 @@ void loop() {
     }
   }
 
-  uint8_t biggestVal = irReceiver.testFunc();
-  btCentral.writeValue(biggestVal);
-  if (biggestVal != 107) {
+  uint8_t biggestVal = irReceiver.listenForIr();
+  if (biggestVal != 107) { // 107 is the unsuccesful ack value
+    btCentral.writeValue(biggestVal);
     while (true) {
       uint8_t val = btCentral.readNewValue();
       if (val != 0) {
         Serial.print("New Motion Value:");
         Serial.println(val);
       }
-      if (val == 105) {
+      if (val == 105) { // 105 is the stop motion ack value
         break;
       }
       delay(20);  
     }
     
   }
-
-  // }
-  // while (true) {
-  //   uint8_t val = btCentral.readValue();
-  //   Serial.println(val);
-  // }
-  //delay(20);
   delay(200);
-  
 }

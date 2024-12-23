@@ -30,22 +30,7 @@ public:
         pinMode(yellowLedPin, OUTPUT);
     }
 
-    void listenForIR() {
-        unsigned long currentMillis = millis();
-        if (currentMillis - previousMillis >= interval) {
-            int receiverState = digitalRead(irReceiverPinOne);
-            Serial.print("IR Receiver Output: ");
-            Serial.println(receiverState);
-            if (receiverState == HIGH) {
-                digitalWrite(greenLedPin, LOW);
-            } else {
-                digitalWrite(greenLedPin, HIGH);
-            }
-            previousMillis = currentMillis;
-        }
-    }
-
-    uint8_t testFunc() {
+    uint8_t listenForIr() {
 
         firstIrReceiverCounter = 0;
         secondIrReceiverCounter = 0;
@@ -60,12 +45,12 @@ public:
             if (receiverState1 == LOW) {
                 digitalWrite(greenLedPin, HIGH);
                 firstIrReceiverCounter++;
-                Serial.println("Adding to first counter");
+                // Serial.println("Adding to first counter");
             } else {
                 digitalWrite(greenLedPin, LOW);
             }
             if (receiverState2 == LOW) {
-                Serial.println("Adding to second counter");
+                // Serial.println("Adding to second counter");
                 digitalWrite(yellowLedPin, HIGH);
                 secondIrReceiverCounter++;
             } else {
@@ -77,12 +62,12 @@ public:
                 //thirdIrReceiverCounter++;
             //}
         }
-        Serial.print("First IR Receiver Counter: ");
-        Serial.println(firstIrReceiverCounter);
-        Serial.print("Second IR Receiver Counter: ");
-        Serial.println(secondIrReceiverCounter);
-        Serial.print("Third IR Receiver Counter: ");
-        Serial.println(thirdIrReceiverCounter);
+        // Serial.print("First IR Receiver Counter: ");
+        // Serial.println(firstIrReceiverCounter);
+        // Serial.print("Second IR Receiver Counter: ");
+        // Serial.println(secondIrReceiverCounter);
+        // Serial.print("Third IR Receiver Counter: ");
+        // Serial.println(thirdIrReceiverCounter);
         if (firstIrReceiverCounter > secondIrReceiverCounter && firstIrReceiverCounter > thirdIrReceiverCounter) {
             Serial.println("First IR Receiver is the highest");
             return 106; // code for successful connection

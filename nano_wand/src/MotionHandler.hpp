@@ -13,9 +13,9 @@ class MotionHandler {
         float pitch, roll, yaw;
         float deltat;
 
-        static constexpr float ROLL_THRESHOLD = 1.0f;
-        static constexpr float PITCH_SPIKE_THRESHOLD = 17.0f;
-        static constexpr float YAW_SPIKE_THRESHOLD = 17.0f;
+        static constexpr float ROLL_THRESHOLD = 3.0f;
+        static constexpr float PITCH_SPIKE_THRESHOLD = 13.0f;
+        static constexpr float YAW_SPIKE_THRESHOLD = 13.0f;
 
         static constexpr int BUFFER_SIZE = 10;
         float pitchBuffer[BUFFER_SIZE];

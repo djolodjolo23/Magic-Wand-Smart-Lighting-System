@@ -62,7 +62,7 @@ void loop() {
             rgbLed.blinkRed(200);
         }
     } else {
-
+        rgbLed.turnOff();
     }
 
     //irControl.update();

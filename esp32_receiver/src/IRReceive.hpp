@@ -8,6 +8,7 @@ private:
     int irReceiverPinThree;
 
     int greenLedPin;
+    int yellowLedPin;
 
     unsigned long previousMillis;
 
@@ -19,13 +20,14 @@ private:
 
 public:
     const long interval = 5;
-    IRReceive(int irReceiverPinOne, int irReceiverPinTwo, int irReceiverPinThree, int greenLedPin)
-    : irReceiverPinOne(irReceiverPinOne), irReceiverPinTwo(irReceiverPinTwo), irReceiverPinThree(irReceiverPinThree), greenLedPin(greenLedPin) 
+    IRReceive(int irReceiverPinOne, int irReceiverPinTwo, int irReceiverPinThree, int greenLedPin, int yellowLedPin)
+    : irReceiverPinOne(irReceiverPinOne), irReceiverPinTwo(irReceiverPinTwo), irReceiverPinThree(irReceiverPinThree), greenLedPin(greenLedPin), yellowLedPin(yellowLedPin)
     {
         pinMode(irReceiverPinOne, INPUT);
         pinMode(irReceiverPinTwo, INPUT);
         pinMode(irReceiverPinThree, INPUT);
         pinMode(greenLedPin, OUTPUT);
+        pinMode(yellowLedPin, OUTPUT);
     }
 
     void listenForIR() {
@@ -62,9 +64,13 @@ public:
             } else {
                 digitalWrite(greenLedPin, LOW);
             }
-            //if (receiverState2 == LOW) {
+            if (receiverState2 == LOW) {
                 //Serial.println("Adding to second counter");
-                //secondIrReceiverCounter++;
+                digitalWrite(yellowLedPin, HIGH);
+                secondIrReceiverCounter++;
+            } else {
+                digitalWrite(yellowLedPin, LOW);
+            }
             //}
             //if (receiverState3 == LOW) {
                 //Serial.println("Adding to third counter");
@@ -79,13 +85,13 @@ public:
         Serial.println(thirdIrReceiverCounter);
         if (firstIrReceiverCounter > secondIrReceiverCounter && firstIrReceiverCounter > thirdIrReceiverCounter) {
             Serial.println("First IR Receiver is the highest");
-            return 2; // test value
+            return 1; // test value
         } else if (secondIrReceiverCounter > firstIrReceiverCounter && secondIrReceiverCounter > thirdIrReceiverCounter) {
             Serial.println("Second IR Receiver is the highest");
             return 2;   // test value
         } else if (thirdIrReceiverCounter > firstIrReceiverCounter && thirdIrReceiverCounter > secondIrReceiverCounter) {
             Serial.println("Third IR Receiver is the highest");
-            return 2;  // test value
+            return 3;  // test value
         }
         return 0;
     }

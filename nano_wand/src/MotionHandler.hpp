@@ -73,7 +73,7 @@ class MotionHandler {
                 }
             }
 
-            String processMotion() {
+            uint8_t processMotion() {
                 if (IMU.accelerationAvailable() && IMU.gyroscopeAvailable()) {
                     IMU.readAcceleration(ax, ay, az);
                     IMU.readGyroscope(gx, gy, gz);
@@ -116,10 +116,10 @@ class MotionHandler {
                                 lastEventTime = currentTime;
                             } else if (dominantAxis == 'P' && maxDiff > PITCH_SPIKE_THRESHOLD) {
                                 lastEventTime = currentTime;
-                                return (pitch > pitchBuffer[(bufferIndex + 1) % BUFFER_SIZE]) ? "UP" : "DOWN";
+                                return (pitch > pitchBuffer[(bufferIndex + 1) % BUFFER_SIZE]) ? 101 : 102;
                             } else if (dominantAxis == 'Y' && maxDiff > YAW_SPIKE_THRESHOLD) {
                                 lastEventTime = currentTime;
-                                return (yaw > yawBuffer[(bufferIndex + 1) % BUFFER_SIZE]) ? "LEFT" : "RIGHT";
+                                return (yaw > yawBuffer[(bufferIndex + 1) % BUFFER_SIZE]) ? 103 : 104;
                             }
                         }
                     }
@@ -132,12 +132,12 @@ class MotionHandler {
                         }
 
                         lastBrightness = brightness;
-                        return "BRIGHTNESS: " + String(brightness);
+                        return brightness;
 
                     }
                 }
 
-                return "";
+                return 0;
             }
 
 };

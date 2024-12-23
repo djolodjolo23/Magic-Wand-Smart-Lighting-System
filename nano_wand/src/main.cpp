@@ -36,6 +36,7 @@ void setup() {
 void loop() {
     long previousMillis = millis(); 
     const long interval = 1000;     
+    // BLINKING RED LED WHILE WAITING FOR CONNECTION
     while (!btPeripheral.isConnectedToCentral()) {
         leds.blinkRed(200);
         if (millis() - previousMillis >= interval) {
@@ -44,14 +45,16 @@ void loop() {
         }
     }
 
+    // BLINKING ALL LEDS TOGETHER
     if (digitalRead(BUTTON_PIN) == LOW) {
         leds.blinkAllTogether(200);
         irControlBleSense.update();
         btPeripheral.pool();
         if (btPeripheral.ifCharacteristicWritten()) {
             uint8_t value = btPeripheral.readValue();
+            // 106 IS THE ACKNOWLEDGEMENT FOR STARTING MOTION STREAM, RECEIVED FROM CENTRAL (ESP32)
             if (value == 106) {
-                Serial.println("Starting motion stream...");
+                // MOTION STREAM, BLINKING ALL LEDS SIMULTANEOUSLY
                 while (true) {
                     leds.blinkAllSimultaneously(200);
                     uint8_t currentMotion = motionHandler.processMotion();
@@ -59,29 +62,19 @@ void loop() {
                         Serial.println(currentMotion);
                         btPeripheral.updateValue(currentMotion);
                     }
-                    //btPeripheral.updateValue(currentMotion);
+                    delay(20);
+                    // ESCAPE MOTION STREAM BY RELEASE OF BUTTON
                     if (digitalRead(BUTTON_PIN) == HIGH) {
                         leds.turnOff();
-                        btPeripheral.updateValue(105); // 105 for end of motion stream
-                        //delay(2000);
+                        btPeripheral.updateValue(105); // 105 for end of motion stream, stream ended
                         break;
                     }
                 }
             }
-        } else {
-            //rgbLed.blinkYellow(200);
-            //rgbLed.blinkRed(200);
-        }
+        } 
     } else {
         leds.turnOff();
         btPeripheral.updateValue(105); // 105 for end of motion stream
     }
 
-    //irControl.update();
-    //irControlBleSense.update();
-    //String motion = motionHandler.processMotion();
-    //if (motion != "") {
-        //Serial.println(motion);
-    //}
-    //delay(20);
 }

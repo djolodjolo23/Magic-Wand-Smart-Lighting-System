@@ -3,24 +3,24 @@
 
 class IRReceive {
 private:
-    int irReceiverPinOne;
-    int irReceiverPinTwo;
-    int irReceiverPinThree;
+    u_int8_t irReceiverPinOne;
+    u_int8_t irReceiverPinTwo;
+    u_int8_t irReceiverPinThree;
 
-    int greenLedPin;
-    int yellowLedPin;
+    u_int8_t greenLedPin;
+    u_int8_t yellowLedPin;
 
     unsigned long previousMillis;
 
     unsigned long irSignalInterval = 1000;
 
-    int firstIrReceiverCounter = 0;
-    int secondIrReceiverCounter = 0;
-    int thirdIrReceiverCounter = 0;
+    uint16_t firstIrReceiverCounter = 0;
+    uint16_t secondIrReceiverCounter = 0;
+    uint16_t thirdIrReceiverCounter = 0;
 
 public:
     const long interval = 5;
-    IRReceive(int irReceiverPinOne, int irReceiverPinTwo, int irReceiverPinThree, int greenLedPin, int yellowLedPin)
+    IRReceive(u_int8_t irReceiverPinOne, u_int8_t irReceiverPinTwo, u_int8_t irReceiverPinThree, u_int8_t greenLedPin, u_int8_t yellowLedPin)
     : irReceiverPinOne(irReceiverPinOne), irReceiverPinTwo(irReceiverPinTwo), irReceiverPinThree(irReceiverPinThree), greenLedPin(greenLedPin), yellowLedPin(yellowLedPin)
     {
         pinMode(irReceiverPinOne, INPUT);
@@ -85,15 +85,15 @@ public:
         Serial.println(thirdIrReceiverCounter);
         if (firstIrReceiverCounter > secondIrReceiverCounter && firstIrReceiverCounter > thirdIrReceiverCounter) {
             Serial.println("First IR Receiver is the highest");
-            return 106; // test value
+            return 106; // code for successful connection
         } else if (secondIrReceiverCounter > firstIrReceiverCounter && secondIrReceiverCounter > thirdIrReceiverCounter) {
             Serial.println("Second IR Receiver is the highest");
-            return 106;   // test value
+            return 106;   // code for successful connection
         } else if (thirdIrReceiverCounter > firstIrReceiverCounter && thirdIrReceiverCounter > secondIrReceiverCounter) {
             Serial.println("Third IR Receiver is the highest");
-            return 106;  // test value
+            return 106;  // code for successful connection
         }
-        return 0;
+        return 107; // code for unsuccessful connection
     }
 
 };

@@ -40,7 +40,7 @@ class MotionHandler {
         }
 
         float calculateBrightness() {
-            int brightness = (int)(((90.0 - roll) / 180.0) * 100.0);
+            int brightness = (int)(((90.0 + roll) / 180.0) * 100.0);
             return constrain(brightness, 0, 100);
         }
 

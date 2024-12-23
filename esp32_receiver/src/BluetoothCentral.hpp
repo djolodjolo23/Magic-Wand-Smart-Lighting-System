@@ -96,6 +96,10 @@ public:
             }
 
             Serial.println("Found characteristic successfully.");
+            if (remoteChar -> canNotify()) {
+                remoteChar->registerForNotify(notifyCallBack);
+                Serial.println("Registered for notifications.");
+            }
             return true;
         } else {
             Serial.println("Failed to connect to NanoBLE.");

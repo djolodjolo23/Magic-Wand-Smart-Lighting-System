@@ -65,7 +65,7 @@ public:
                 digitalWrite(greenLedPin, LOW);
             }
             if (receiverState2 == LOW) {
-                //Serial.println("Adding to second counter");
+                Serial.println("Adding to second counter");
                 digitalWrite(yellowLedPin, HIGH);
                 secondIrReceiverCounter++;
             } else {
@@ -85,13 +85,13 @@ public:
         Serial.println(thirdIrReceiverCounter);
         if (firstIrReceiverCounter > secondIrReceiverCounter && firstIrReceiverCounter > thirdIrReceiverCounter) {
             Serial.println("First IR Receiver is the highest");
-            return 1; // test value
+            return 106; // test value
         } else if (secondIrReceiverCounter > firstIrReceiverCounter && secondIrReceiverCounter > thirdIrReceiverCounter) {
             Serial.println("Second IR Receiver is the highest");
-            return 2;   // test value
+            return 106;   // test value
         } else if (thirdIrReceiverCounter > firstIrReceiverCounter && thirdIrReceiverCounter > secondIrReceiverCounter) {
             Serial.println("Third IR Receiver is the highest");
-            return 3;  // test value
+            return 106;  // test value
         }
         return 0;
     }

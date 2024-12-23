@@ -17,7 +17,7 @@ class BluetoothPeripheral {
           charUUID(cUUID),
           deviceName(dName),
           service(sUUID),
-          characteristic(cUUID, BLERead | BLEWrite)
+          characteristic(cUUID, BLERead | BLEWrite | BLENotify)
         {}
 
         bool begin() {

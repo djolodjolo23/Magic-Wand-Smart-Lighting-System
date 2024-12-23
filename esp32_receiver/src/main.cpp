@@ -29,15 +29,20 @@ void loop() {
   //irReceiver.listenForIR();
   uint8_t biggestVal = irReceiver.testFunc();
   btCentral.writeValue(biggestVal);
-  // if (biggestVal > 0) {
-  //   while(true) {
-  //     uint8_t val = btCentral.readNewValue();
-  //     Serial.println(val);
-  //     if (val == 105) {
-  //       break;
-  //     }
-  //     delay(200);
-  //   }
+  if (biggestVal > 0) {
+    while (true) {
+      uint8_t val = btCentral.readNewValue();
+      if (val != 0) {
+        Serial.print("New Motion Value:");
+        Serial.println(val);
+      }
+      if (val == 105) {
+        break;
+      }
+      delay(100);  // Or other logic to break out eventually
+    }
+    
+  }
 
   // }
   // while (true) {

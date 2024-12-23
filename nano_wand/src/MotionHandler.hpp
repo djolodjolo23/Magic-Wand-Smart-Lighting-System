@@ -31,6 +31,7 @@ class MotionHandler {
         static constexpr unsigned long EVENT_COOLDOWN = 600;
         static constexpr unsigned long ROLL_MODE_TIMEOUT = 1000;
         unsigned long lastEventTime;
+        static int lastRollValue;
 
         void updateBuffers() {
             pitchBuffer[bufferIndex] = pitch;
@@ -131,8 +132,16 @@ class MotionHandler {
                             inRollMode = false;
                         }
 
-                        lastBrightness = brightness;
-                        return brightness;
+                        if (brightness != lastBrightness) {
+                            //lastEventTime = currentTime;
+                            lastBrightness = brightness;
+                            return brightness;
+                        } else {
+                            return 0;
+                        }
+
+                        //lastBrightness = brightness;
+                        //return brightness;
 
                     }
                 }

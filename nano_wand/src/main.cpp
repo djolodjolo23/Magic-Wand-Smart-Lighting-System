@@ -50,15 +50,20 @@ void loop() {
         btPeripheral.pool();
         if (btPeripheral.ifCharacteristicWritten()) {
             uint8_t value = btPeripheral.readValue();
-            if (value == 2) {
+            if (value == 106) {
                 Serial.println("Starting motion stream...");
                 while (true) {
                     leds.blinkAllSimultaneously(200);
                     uint8_t currentMotion = motionHandler.processMotion();
-                    btPeripheral.updateValue(currentMotion);
+                    if (currentMotion > 0) {
+                        Serial.println(currentMotion);
+                        btPeripheral.updateValue(currentMotion);
+                    }
+                    //btPeripheral.updateValue(currentMotion);
                     if (digitalRead(BUTTON_PIN) == HIGH) {
                         leds.turnOff();
-                        delay(2000);
+                        btPeripheral.updateValue(105); // 105 for end of motion stream
+                        //delay(2000);
                         break;
                     }
                 }

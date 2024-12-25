@@ -46,16 +46,12 @@ public:
                 digitalWrite(greenLedPin, HIGH);
                 firstIrReceiverCounter++;
                 // Serial.println("Adding to first counter");
-            } else {
-                digitalWrite(greenLedPin, LOW);
-            }
+            } 
             if (receiverState2 == LOW) {
                 // Serial.println("Adding to second counter");
                 digitalWrite(yellowLedPin, HIGH);
                 secondIrReceiverCounter++;
-            } else {
-                digitalWrite(yellowLedPin, LOW);
-            }
+            } 
             //}
             //if (receiverState3 == LOW) {
                 //Serial.println("Adding to third counter");

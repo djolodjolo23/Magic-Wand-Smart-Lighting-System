@@ -75,7 +75,6 @@ class Leds {
                 currentLed = (currentLed + 1) % 3;
                 previousMillis = currentMillis;
             }
-
             if (currentLed == 0) {
                 digitalWrite(redPin, HIGH);
                 digitalWrite(yellowPin, LOW);

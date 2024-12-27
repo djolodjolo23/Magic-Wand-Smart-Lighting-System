@@ -9,6 +9,7 @@ private:
     const int ledCount;
     const int brightness;
     Adafruit_NeoPixel strip;
+    bool on = false;
 
     uint32_t colors[3]; 
 
@@ -53,18 +54,25 @@ public:
 
     void testFunc(uint8_t val) {
         if (val == 103) { // left
-            currentColorIndex = (currentColorIndex + 1) % 3;
-            showColor(colors[currentColorIndex]);
+            if (on) {
+                currentColorIndex = (currentColorIndex + 1) % 3;
+                showColor(colors[currentColorIndex]);
+            }
         }
         if (val == 104) { // right
-            currentColorIndex = (currentColorIndex - 1 + 3) % 3; 
-            showColor(colors[currentColorIndex]);
+            if (on) {
+                currentColorIndex = (currentColorIndex - 1 + 3) % 3; 
+                showColor(colors[currentColorIndex]);
+            }
         }
-        if (val == 101) { // up
-            showColor(colors[currentColorIndex]);
-        }
-        if (val == 102) { 
-            showColor(strip.Color(0, 0, 0));
+        if (val == 101 || val == 102) { // up
+            if (on == false) {
+                on = true;
+                showColor(colors[currentColorIndex]);
+            } else {
+                on = false;
+                setAllPixels(strip.Color(0, 0, 0));
+            }
         }
         if (val >= 0 && val <= 100) {
             setBrightness(val * 2.55);

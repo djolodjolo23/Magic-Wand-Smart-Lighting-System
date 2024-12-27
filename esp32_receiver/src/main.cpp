@@ -7,23 +7,27 @@ static const char* sUUID = "1c0e6984-77ac-4a2c-88d0-0331c44c9b32";
 static const char* cUUID = "eda7f160-c43f-453e-bdbd-cbae7b01d49b";
 
 const u_int8_t IR_RECEIVER_PIN_ONE = 32;
-const u_int8_t IR_RECEIVER_PIN_TWO = 34;
-const u_int8_t IR_RECEIVER_PIN_THREE = 35;
-const u_int8_t GREEN_LED_PIN = 33;
-const u_int8_t YELLOW_LED_PIN = 12;
+const u_int8_t IR_RECEIVER_PIN_TWO = 35;
+const u_int8_t IR_RECEIVER_PIN_THREE = 34;
 
-const u_int8_t LED_STRIP_PIN = 26;
-const u_int8_t LED_STRIP_COUNT = 3;
-const u_int8_t LED_STRIP_BRIGHTNESS = 20;
+const u_int8_t LED_STRIP_PIN_ONE = 26; // 12 is good
+const u_int8_t LED_STRIP_PIN_TWO = 25;
+const u_int8_t LED_STRIP_PIN_THREE = 33;
+const u_int8_t LED_STRIP_COUNT = 5;
+const u_int8_t LED_STRIP_BRIGHTNESS = 50;
 
 BluetoothCentral btCentral(sUUID, cUUID, "ESP32_Central");
-IRReceive irReceiver(IR_RECEIVER_PIN_ONE, IR_RECEIVER_PIN_TWO, IR_RECEIVER_PIN_THREE, GREEN_LED_PIN, YELLOW_LED_PIN);
-LedStrip ledStrip(LED_STRIP_PIN, LED_STRIP_COUNT, LED_STRIP_BRIGHTNESS);
+IRReceive irReceiver(IR_RECEIVER_PIN_ONE, IR_RECEIVER_PIN_TWO, IR_RECEIVER_PIN_THREE);
+LedStrip ledStripOne(LED_STRIP_PIN_ONE, LED_STRIP_COUNT, LED_STRIP_BRIGHTNESS);
+LedStrip ledStripTwo(LED_STRIP_PIN_TWO, LED_STRIP_COUNT, LED_STRIP_BRIGHTNESS);
+LedStrip ledStripThree(LED_STRIP_PIN_THREE, LED_STRIP_COUNT, LED_STRIP_BRIGHTNESS);
 
 void setup() {
   Serial.begin(9600);
   BLEDevice::init("ESP32_Central");
-  ledStrip.beginAndShow();
+  ledStripOne.beginAndShow();
+  ledStripTwo.beginAndShow();
+  ledStripThree.beginAndShow();
 }
 
 void loop() {
@@ -39,14 +43,22 @@ void loop() {
   }
 
   uint8_t biggestVal = irReceiver.listenForIr();
-  if (biggestVal != 107) { // 107 is the unsuccesful ack value
+  Serial.print("Biggest val: ");
+  Serial.println(biggestVal);
+  if (biggestVal != 109) { // 109 is the unsuccesful ack value
     btCentral.writeValue(biggestVal);
     while (true) {
       uint8_t val = btCentral.readNewValue();
       if (val != 0) {
-        Serial.print("New Motion Value:");
+        Serial.print("Received value: ");
         Serial.println(val);
-        ledStrip.testFunc(val);
+        if (biggestVal == 106) {
+          ledStripOne.testFunc(val);
+        } else if (biggestVal == 107) {
+          ledStripTwo.testFunc(val);
+        } else if (biggestVal == 108) {
+          ledStripThree.testFunc(val);
+        }
       }
       if (val == 105) { // 105 is the stop motion ack value
         break;

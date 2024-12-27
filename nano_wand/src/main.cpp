@@ -53,7 +53,7 @@ void loop() {
         if (btPeripheral.ifCharacteristicWritten()) {
             uint8_t value = btPeripheral.readValue();
             // 106 IS THE ACKNOWLEDGEMENT FOR STARTING MOTION STREAM, RECEIVED FROM CENTRAL (ESP32)
-            if (value == 106) {
+            if (value >= 106 && value <= 108) {
                 // MOTION STREAM, BLINKING ALL LEDS SIMULTANEOUSLY
                 while (true) {
                     leds.blinkAllSimultaneously(200);

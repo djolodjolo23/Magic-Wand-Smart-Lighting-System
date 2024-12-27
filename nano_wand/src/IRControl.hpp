@@ -17,6 +17,7 @@ class IRControl {
         // Let's pick a convenient top (wrap value):
         // If we choose top = 999 (for a nice 1000 counts):
         // (top+1) = 1000
+        
         // clkdiv = 3289.47 / 1000 ≈ 3.289
         //
         // We'll use:

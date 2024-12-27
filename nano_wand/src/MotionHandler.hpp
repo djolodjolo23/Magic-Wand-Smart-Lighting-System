@@ -14,7 +14,7 @@ private:
     float deltat;
 
   
-    static constexpr int FILTER_WINDOW = 5;  
+    static constexpr int FILTER_WINDOW = 10;  
     float gxSamples[FILTER_WINDOW];
     float gySamples[FILTER_WINDOW];
     float gzSamples[FILTER_WINDOW];
@@ -31,9 +31,9 @@ private:
     int   angleIndex;             
     bool  angleBuffersInitialized; 
 
-    static constexpr float ROLL_THRESHOLD       = 3.0f;
-    static constexpr float PITCH_SPIKE_THRESHOLD = 13.0f;
-    static constexpr float YAW_SPIKE_THRESHOLD   = 13.0f;
+    static constexpr float ROLL_THRESHOLD       = 5.0f;
+    static constexpr float PITCH_SPIKE_THRESHOLD = 15.0f;
+    static constexpr float YAW_SPIKE_THRESHOLD   = 15.0f;
 
     static constexpr int BUFFER_SIZE = 10;
     float pitchBuffer[BUFFER_SIZE];
@@ -42,7 +42,7 @@ private:
 
     // Stability logic
     static constexpr int STABLE_READING_COUNT      = 35;
-    static constexpr int STABLE_READING_THRESHOLD  = 2;
+    static constexpr int STABLE_READING_THRESHOLD  = 4;
     int stableReadings;
     int lastBrightness;
 

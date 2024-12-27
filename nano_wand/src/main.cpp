@@ -59,7 +59,6 @@ void loop() {
                     leds.blinkAllSimultaneously(200);
                     uint8_t currentMotion = motionHandler.processMotion();
                     if (currentMotion > 0) {
-                        Serial.println(currentMotion);
                         btPeripheral.updateValue(currentMotion);
                     }
                     delay(20);

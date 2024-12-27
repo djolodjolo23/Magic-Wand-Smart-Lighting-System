@@ -10,10 +10,10 @@ const u_int8_t IR_RECEIVER_PIN_ONE = 32;
 const u_int8_t IR_RECEIVER_PIN_TWO = 35;
 const u_int8_t IR_RECEIVER_PIN_THREE = 34;
 
-const u_int8_t LED_STRIP_PIN_ONE = 26; // 12 is good
+const u_int8_t LED_STRIP_PIN_ONE = 26; 
 const u_int8_t LED_STRIP_PIN_TWO = 25;
 const u_int8_t LED_STRIP_PIN_THREE = 33;
-const u_int8_t LED_STRIP_COUNT = 5;
+const u_int8_t LED_STRIP_COUNT = 17;
 const u_int8_t LED_STRIP_BRIGHTNESS = 50;
 
 BluetoothCentral btCentral(sUUID, cUUID, "ESP32_Central");

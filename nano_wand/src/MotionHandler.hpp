@@ -31,7 +31,7 @@ private:
     bool  angleBuffersInitialized; 
 
     // Your existing thresholds
-    static constexpr float ROLL_THRESHOLD        = 5.0f;
+    static constexpr float ROLL_THRESHOLD        = 2.0f;
     static constexpr float PITCH_SPIKE_THRESHOLD = 10.0f;
     static constexpr float YAW_SPIKE_THRESHOLD   = 10.0f;
 
@@ -60,7 +60,7 @@ private:
     // 1) Time-window-based diff accumulation
     // ---------------------------------------
     // We'll store rollDiff, pitchDiff, yawDiff for a short window (e.g., ~100 ms)
-    static constexpr int DIFF_WINDOW_SIZE = 15; // e.g. 10 samples 
+    static constexpr int DIFF_WINDOW_SIZE = 15; 
     float rollDiffBuffer[DIFF_WINDOW_SIZE];
     float pitchDiffBuffer[DIFF_WINDOW_SIZE];
     float yawDiffBuffer[DIFF_WINDOW_SIZE];
@@ -294,7 +294,8 @@ public:
             gz *= DEG_TO_RAD;
 
             deltat = fusion.deltatUpdate();
-            fusion.MahonyUpdate(gx, gy, gz, ax, ay, az, deltat);
+            //fusion.MahonyUpdate(gx, gy, gz, ax, ay, az, deltat);
+            fusion.MadgwickUpdate(gx, gy, gz, ax, ay, az, deltat);
 
             roll  = fusion.getRoll();
             pitch = fusion.getPitch();
@@ -323,7 +324,8 @@ public:
             gz *= DEG_TO_RAD;
 
             deltat = fusion.deltatUpdate();
-            fusion.MahonyUpdate(gx, gy, gz, ax, ay, az, deltat);
+            //fusion.MahonyUpdate(gx, gy, gz, ax, ay, az, deltat);
+            fusion.MadgwickUpdate(gx, gy, gz, ax, ay, az, deltat);
 
             roll  = fusion.getRoll();
             pitch = fusion.getPitch();

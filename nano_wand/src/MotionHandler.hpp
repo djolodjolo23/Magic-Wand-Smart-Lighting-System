@@ -1,7 +1,7 @@
 #pragma once
 
-//#include <Arduino_LSM6DS3.h>
-#include <Arduino_LSM9DS1.h>
+//#include <Arduino_LSM6DS3.h> // for rp2040 connect
+#include <Arduino_LSM9DS1.h> // for ble sense
 #include "Streaming.h"
 #include "SensorFusion.h"
 
@@ -23,44 +23,41 @@ private:
     int   sampleIndex;        
     bool  buffersInitialized;   
 
-    static constexpr int ANGLE_WINDOW = 5;  
+    static constexpr int ANGLE_WINDOW = 5; // modifiable
     float rollSamples[ANGLE_WINDOW];
     float pitchSamples[ANGLE_WINDOW];
     float yawSamples[ANGLE_WINDOW];
     int   angleIndex;             
     bool  angleBuffersInitialized; 
 
-    // Your existing thresholds
-    static constexpr float ROLL_THRESHOLD        = 5.0f;
-    static constexpr float PITCH_SPIKE_THRESHOLD = 10.0f;
-    static constexpr float YAW_SPIKE_THRESHOLD   = 10.0f;
+    static constexpr float ROLL_THRESHOLD        = 5.0f; // modifiable
+    static constexpr float PITCH_SPIKE_THRESHOLD = 10.0f; // modifiable
+    static constexpr float YAW_SPIKE_THRESHOLD   = 10.0f; // modifiable
 
-    // --------- New margin value ------------
-    static constexpr float ROLL_MARGIN = 50.0f; 
-    // If pitch or yaw are within ROLL_MARGIN of roll, we won't pick roll as dominant
+    // margin for not picking roll if pitch or yaw is close
+    static constexpr float ROLL_MARGIN = 50.0f;  // modifiable
 
-    // Buffers for angle references
-    static constexpr int BUFFER_SIZE = 10;
+    static constexpr int BUFFER_SIZE = 10; // modifiable
     float pitchBuffer[BUFFER_SIZE];
     float yawBuffer[BUFFER_SIZE];
+    float rollBuffer[BUFFER_SIZE];
     int   bufferIndex;
 
-    // Stability / brightness
-    static constexpr int STABLE_READING_COUNT     = 35;
-    static constexpr int STABLE_READING_THRESHOLD = 4;
+    static constexpr int STABLE_READING_COUNT     = 35; // modifiable
+    static constexpr int STABLE_READING_THRESHOLD = 4; // modifiable
     int stableReadings;
     int lastBrightness;
 
     bool inRollMode;
-    static constexpr unsigned long EVENT_COOLDOWN     = 600;
-    static constexpr unsigned long ROLL_MODE_TIMEOUT  = 1000;
+    static constexpr unsigned long EVENT_COOLDOWN     = 600; // modifiable
+    static constexpr unsigned long ROLL_MODE_TIMEOUT  = 1000; // modifiable
     unsigned long lastEventTime;
 
     // ---------------------------------------
     // 1) Time-window-based diff accumulation
     // ---------------------------------------
     // We'll store rollDiff, pitchDiff, yawDiff for a short window (e.g., ~100 ms)
-    static constexpr int DIFF_WINDOW_SIZE = 15; 
+    static constexpr int DIFF_WINDOW_SIZE = 15; //window size
     float rollDiffBuffer[DIFF_WINDOW_SIZE];
     float pitchDiffBuffer[DIFF_WINDOW_SIZE];
     float yawDiffBuffer[DIFF_WINDOW_SIZE];
@@ -68,7 +65,7 @@ private:
     bool  diffWindowFull;  
 
     // ---------------------------------------
-    // Helper: accumulate diffs each iteration
+    // Helper: accumulate diffs over the window
     // ---------------------------------------
     void accumulateDiffs(float rollDiff, float pitchDiff, float yawDiff) {
         rollDiffBuffer[diffIndex]  = rollDiff;
@@ -77,13 +74,14 @@ private:
 
         diffIndex = (diffIndex + 1) % DIFF_WINDOW_SIZE;
         if (diffIndex == 0) {
-            // Once we wrap around, we know the window is full
+            // once we wrap around, the window is full
             diffWindowFull = true;
         }
     }
 
     // ---------------------------------------
     // Helper: evaluate dominant axis over the window
+    // Returns 'R', 'P', 'Y', or 'N' (none)
     // ---------------------------------------
     char evaluateDominantAxisOverWindow() {
         // We can compute an average or a peak. Let's do average here.
@@ -127,12 +125,6 @@ private:
         float maxDiff = avgRollDiff;
         char  dominantAxis = 'R';
 
-        // *** Add the margin check for roll *** 
-        // Means roll must exceed pitch by ROLL_MARGIN, etc.
-
-        // We'll do standard "which is bigger" logic, 
-        // but keep in mind if pitch is close to roll by less than ROLL_MARGIN, skip roll
-
         // Check pitch
         if (avgPitchDiff > maxDiff) {
             // If roll is bigger but not bigger by margin, we might skip rolling
@@ -161,20 +153,103 @@ private:
         return dominantAxis;
     }
 
+    char evaluateDominantAxisOverWindowPeak() {
+        // We'll look for the maximum roll/pitch/yaw diff in the ring buffer
+        float peakRollDiff  = 0.0f;
+        float peakPitchDiff = 0.0f;
+        float peakYawDiff   = 0.0f;
+
+        // Determine how many valid samples we have
+        int count = diffWindowFull ? DIFF_WINDOW_SIZE : diffIndex;
+
+        // If we have no samples, return 'N' (none)
+        if (count == 0) {
+            return 'N';
+        }
+
+        // Find the peak (max) values for roll, pitch, yaw diffs
+        for (int i = 0; i < count; i++) {
+            if (rollDiffBuffer[i]  > peakRollDiff)  peakRollDiff  = rollDiffBuffer[i];
+            if (pitchDiffBuffer[i] > peakPitchDiff) peakPitchDiff = pitchDiffBuffer[i];
+            if (yawDiffBuffer[i]   > peakYawDiff)   peakYawDiff   = yawDiffBuffer[i];
+        }
+
+        // Compare peak diffs to thresholds
+        bool rollPassed  = (peakRollDiff  > ROLL_THRESHOLD);
+        bool pitchPassed = (peakPitchDiff > PITCH_SPIKE_THRESHOLD);
+        bool yawPassed   = (peakYawDiff   > YAW_SPIKE_THRESHOLD);
+
+        // If none pass, return 'N'
+        if (!rollPassed && !pitchPassed && !yawPassed) {
+            return 'N';
+        }
+
+        // If exactly one passes, pick that
+        int passCount = (rollPassed ? 1 : 0)
+                    + (pitchPassed ? 1 : 0)
+                    + (yawPassed   ? 1 : 0);
+        if (passCount == 1) {
+            if (rollPassed)  return 'R';
+            if (pitchPassed) return 'P';
+            if (yawPassed)   return 'Y';
+        }
+
+        // If multiple pass, pick whichever peak is largest
+        float maxDiff = peakRollDiff;
+        char dominantAxis = 'R';
+
+        if (peakPitchDiff > maxDiff) {
+            maxDiff = peakPitchDiff;
+            dominantAxis = 'P';
+        }
+        if (peakYawDiff > maxDiff) {
+            maxDiff = peakYawDiff;
+            dominantAxis = 'Y';
+        }
+
+        // Additional margin logic if roll is chosen
+        if (dominantAxis == 'R') {
+            // If pitch is within ROLL_MARGIN => discard roll
+            if ((peakRollDiff - peakPitchDiff) < ROLL_MARGIN && peakPitchDiff > ROLL_THRESHOLD) {
+                dominantAxis = 'P';
+            }
+            // If yaw is within ROLL_MARGIN => discard roll
+            if ((peakRollDiff - peakYawDiff) < ROLL_MARGIN && peakYawDiff > ROLL_THRESHOLD) {
+                dominantAxis = 'Y';
+            }
+        }
+
+        return dominantAxis;
+    }
+
+
     // ---------------------------------------
-    // Rest of your existing helpers
+    // Helper: update buffers
     // ---------------------------------------
     void updateBuffers() {
         pitchBuffer[bufferIndex] = pitch;
         yawBuffer[bufferIndex]   = yaw;
+        rollBuffer[bufferIndex]  = roll;
         bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
     }
 
+    // ---------------------------------------
+    // Helper: calculate brightness
+    // calculate brightness based on roll, 0-100
+    // uses the formula brightness = (90 + roll) / 180 * 100
+    // since roll is between -90 and 90, this will give us a value between 0 and 100
+    // For RP2040 connect, this formula might need to be adjusted as the range might start from 90 to -90
+    // therefore the formula would be brightness = (roll + 90) / 180 * 100
+    // ---------------------------------------
     float calculateBrightness() {
         int brightness = (int)(((90.0f + roll) / 180.0f) * 100.0f);
         return constrain(brightness, 0, 100);
     }
 
+    // ---------------------------------------
+    // Helper: isStableBrightness
+    // check if brightness is stable for a certain number of readings
+    // ---------------------------------------
     bool isStableBrightness(int brightness) {
         if (abs(brightness - lastBrightness) <= STABLE_READING_THRESHOLD) {
             stableReadings++;
@@ -184,6 +259,10 @@ private:
         return stableReadings >= STABLE_READING_COUNT;
     }
 
+    // ---------------------------------------
+    // Helper: recordRawSample
+    // record a raw sample and filter it with moving average
+    // ---------------------------------------
     void recordRawSample(float& outVal, float* buffer, float newVal) {
         buffer[sampleIndex] = newVal;
         float sum = 0;
@@ -193,6 +272,10 @@ private:
         outVal = sum / FILTER_WINDOW;
     }
 
+    // ---------------------------------------
+    // Helper: readAndFilterIMU
+    // read and filter IMU data for motion processing
+    // ---------------------------------------
     void readAndFilterIMU() {
         float gxRaw, gyRaw, gzRaw;
         float axRaw, ayRaw, azRaw;
@@ -200,6 +283,8 @@ private:
         IMU.readAcceleration(axRaw, ayRaw, azRaw);
         IMU.readGyroscope(gxRaw, gyRaw, gzRaw);
 
+
+        // fill up buffers
         if (!buffersInitialized) {
             for (int i = 0; i < FILTER_WINDOW; i++) {
                 gxSamples[i] = gxRaw;
@@ -248,6 +333,7 @@ private:
     }
 
 public:
+    // Constructor
     MotionHandler() 
       : gx(0), gy(0), gz(0), 
         ax(0), ay(0), az(0), 
@@ -268,6 +354,7 @@ public:
         for (int i = 0; i < BUFFER_SIZE; i++) {
             pitchBuffer[i] = 0.0f;
             yawBuffer[i]   = 0.0f;
+            rollBuffer[i]  = 0.0f;
         }
         for (int i = 0; i < DIFF_WINDOW_SIZE; i++) {
             rollDiffBuffer[i]  = 0.0f;
@@ -286,6 +373,9 @@ public:
         }
     }
 
+
+    // Debug motion function
+    // This function prints the roll, pitch, and yaw values to the Serial Monitor
     void debugMotion() {
         if (IMU.accelerationAvailable() && IMU.gyroscopeAvailable() && IMU.magneticFieldAvailable()) {
             readAndFilterIMU();
@@ -303,7 +393,6 @@ public:
 
             smoothAngles();
 
-            // Print angles
             Serial.print("Roll: ");
             Serial.print(roll, 2);
             Serial.print("   Pitch: ");
@@ -325,6 +414,7 @@ public:
 
             deltat = fusion.deltatUpdate();
             //fusion.MahonyUpdate(gx, gy, gz, ax, ay, az, deltat);
+            // I think Madgwicks is more stable
             fusion.MadgwickUpdate(gx, gy, gz, ax, ay, az, deltat);
 
             roll  = fusion.getRoll();
@@ -338,16 +428,24 @@ public:
 
             // Instead of checking diffs for just the last sample, we 
             //  compute them and store them for a short window
-            float rollDiff  = fabs(roll  - pitchBuffer[(bufferIndex + 1) % BUFFER_SIZE]);
+            float rollDiff  = fabs(roll - rollBuffer[(bufferIndex + 1) % BUFFER_SIZE]);
             float pitchDiff = fabs(pitch - pitchBuffer[(bufferIndex + 1) % BUFFER_SIZE]);
             float yawDiff   = fabs(yaw   - yawBuffer[(bufferIndex + 1) % BUFFER_SIZE]);
 
             // Accumulate into diff arrays
             accumulateDiffs(rollDiff, pitchDiff, yawDiff);
 
-            // Only evaluate the axis once we have enough samples (or after a short time).
-            // Let's evaluate every iteration for demo, but you could check every 10 samples.
-            char dominantAxis = evaluateDominantAxisOverWindow();
+            char dominantAxis;
+
+            bool usePeakMethod = false;
+
+            if (usePeakMethod) {
+                // Use peak method
+                dominantAxis = evaluateDominantAxisOverWindowPeak();
+            } else {
+                // Use average method
+                dominantAxis = evaluateDominantAxisOverWindow();
+            }
 
             if (!inRollMode) {
                 if ((currentTime - lastEventTime > EVENT_COOLDOWN)) {

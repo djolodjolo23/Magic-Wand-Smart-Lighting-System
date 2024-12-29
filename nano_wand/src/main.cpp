@@ -35,14 +35,13 @@ void setup() {
 
 void loop() {
     long previousMillis = millis(); 
-    const long interval = 1000;     
-    // BLINKING RED LED WHILE WAITING FOR CONNECTION
-    //motionHandler.debugMotion();
-    uint8_t gesture = motionHandler.processMotion();
-    if (gesture != 0) {
-        Serial.println(gesture);
-    }
+    const long interval = 1000;
+    uint8_t value = motionHandler.processMotion();
+    if (value > 0) {
+        Serial.println(value);
+    }     
     delay(20);
+    // BLINKING RED LED WHILE WAITING FOR CONNECTION
     // while (!btPeripheral.isConnectedToCentral()) {
     //     leds.blinkRed(200);
     //     if (millis() - previousMillis >= interval) {
@@ -71,7 +70,7 @@ void loop() {
     //                 // ESCAPE MOTION STREAM BY RELEASE OF BUTTON
     //                 if (digitalRead(BUTTON_PIN) == HIGH) {
     //                     leds.turnOff();
-    //                     btPeripheral.updateValue(105); // 105 for end of motion stream, stream ended
+    //                     btPeripheral.updateValue(105); // 105 for end of motion stream
     //                     break;
     //                 }
     //             }

@@ -14,7 +14,7 @@ const u_int8_t LED_STRIP_PIN_ONE = 26;
 const u_int8_t LED_STRIP_PIN_TWO = 25;
 const u_int8_t LED_STRIP_PIN_THREE = 33;
 
-const u_int8_t LED_STRIP_COUNT = 17; // 17 is default, 3 for testing
+const u_int8_t LED_STRIP_COUNT = 3; // 17 is default, 3 for testing
 const u_int8_t LED_STRIP_BRIGHTNESS = 50;
 
 BluetoothCentral btCentral(sUUID, cUUID, "ESP32_Central");

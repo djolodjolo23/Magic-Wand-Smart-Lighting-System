@@ -40,8 +40,8 @@ void loop() {
     if (value > 0) {
         Serial.println(value);
     }     
-    delay(20);
-    // BLINKING RED LED WHILE WAITING FOR CONNECTION
+    // delay(20);
+    //BLINKING RED LED WHILE WAITING FOR CONNECTION
     // while (!btPeripheral.isConnectedToCentral()) {
     //     leds.blinkRed(200);
     //     if (millis() - previousMillis >= interval) {

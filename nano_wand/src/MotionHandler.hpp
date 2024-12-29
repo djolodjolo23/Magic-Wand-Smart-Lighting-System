@@ -30,7 +30,7 @@ private:
     int   angleIndex;             
     bool  angleBuffersInitialized; 
 
-    static constexpr float ROLL_THRESHOLD        = 5.0f; // modifiable
+    static constexpr float ROLL_THRESHOLD        = 4.0f; // modifiable
     static constexpr float PITCH_SPIKE_THRESHOLD = 10.0f; // modifiable
     static constexpr float YAW_SPIKE_THRESHOLD   = 10.0f; // modifiable
 
@@ -43,14 +43,14 @@ private:
     float rollBuffer[BUFFER_SIZE];
     int   bufferIndex;
 
-    static constexpr int STABLE_READING_COUNT     = 35; // modifiable
-    static constexpr int STABLE_READING_THRESHOLD = 4; // modifiable
+    static constexpr int STABLE_READING_COUNT     = 50; // modifiable
+    static constexpr int STABLE_READING_THRESHOLD = 3; // modifiable
     int stableReadings;
     int lastBrightness;
 
     bool inRollMode;
     static constexpr unsigned long EVENT_COOLDOWN     = 600; // modifiable
-    static constexpr unsigned long ROLL_MODE_TIMEOUT  = 1000; // modifiable
+    static constexpr unsigned long ROLL_MODE_TIMEOUT  = 500; // modifiable
     unsigned long lastEventTime;
 
     // ---------------------------------------

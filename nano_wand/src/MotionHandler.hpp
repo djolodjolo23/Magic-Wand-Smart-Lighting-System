@@ -31,7 +31,7 @@ private:
     bool  angleBuffersInitialized; 
 
     // Your existing thresholds
-    static constexpr float ROLL_THRESHOLD        = 2.0f;
+    static constexpr float ROLL_THRESHOLD        = 5.0f;
     static constexpr float PITCH_SPIKE_THRESHOLD = 10.0f;
     static constexpr float YAW_SPIKE_THRESHOLD   = 10.0f;
 

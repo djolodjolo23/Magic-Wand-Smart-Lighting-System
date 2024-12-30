@@ -1,18 +1,31 @@
-#include <Arduino.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
 
-// put function declarations here:
-int myFunction(int, int);
+const char* ssid = "Tele2_108703";
+const char* password = "q2yymgzk";
+const char* mqtt_server = "192.168.0.24";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+    Serial.begin(9600);
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+    }
+    Serial.println("Connected to WiFi");
+    client.setServer(mqtt_server, 1883);
+    client.connect("ESP32Client");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
+    if (!client.connected()) {
+        client.connect("ESP32Client");
+    }
+    Serial.println("Publishing message");
+    client.loop();
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+    client.publish("test/topic", "Hello from ESP32!");
+    delay(5000); 
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Arduino_LSM6DS3.h> // for rp2040 connect
 //#include <Arduino_LSM9DS1.h> // for ble sense
 #include "Streaming.h"
 #include "SensorFusion.h"
@@ -243,10 +242,10 @@ private:
     // uses the formula brightness = (90 + roll) / 180 * 100
     // since roll is between -90 and 90, this will give us a value between 0 and 100
     // For RP2040 connect, this formula might need to be adjusted as the range might start from 90 to -90
-    // therefore the formula would be brightness = (roll + 90) / 180 * 100
+    // therefore the formula would be brightness = (90 - roll) / 180 * 100
     // ---------------------------------------
     float calculateBrightness() {
-        int brightness = (int)(((90.0f + roll) / 180.0f) * 100.0f);
+        int brightness = (int)(((90.0f - roll) / 180.0f) * 100.0f);
         return constrain(brightness, 0, 100);
     }
 

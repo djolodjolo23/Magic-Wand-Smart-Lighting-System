@@ -5,7 +5,6 @@
 class IRControl {
     private:
         const int IR_LED_PIN;
-        const int BUTTON_PIN;
 
         // The following parameters are chosen to achieve ~38kHz:
         // frequency = system_clock / (clkdiv * (top + 1))
@@ -34,13 +33,10 @@ class IRControl {
         uint channel;
 
     public:
-        IRControl(int IrLedPin, int ButtonPin)
-            : IR_LED_PIN(IrLedPin),
-              BUTTON_PIN(ButtonPin) {}
+        IRControl(int IrLedPin)
+            : IR_LED_PIN(IrLedPin) {}
 
         void init() {
-            pinMode(BUTTON_PIN, INPUT_PULLUP);
-
             // Set IR_LED_PIN to PWM
             gpio_set_function((uint)IR_LED_PIN, GPIO_FUNC_PWM);
 
@@ -58,13 +54,9 @@ class IRControl {
         }
 
         void update() {
-            if (digitalRead(BUTTON_PIN) == LOW) {
-                pwm_set_chan_level(slice_num, channel, dutyOn);
-                delay(150);
-                pwm_set_chan_level(slice_num, channel, dutyOff);
-                delay(150);
-            } else {
-                pwm_set_chan_level(slice_num, channel, dutyOff);
-            }
+            pwm_set_chan_level(slice_num, channel, dutyOn);
+            delay(50);
+            pwm_set_chan_level(slice_num, channel, dutyOff);
+            delay(5);
         }
 };

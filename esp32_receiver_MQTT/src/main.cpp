@@ -12,22 +12,32 @@ const String clientId = "2";
 const String motionSubTopic = "app/motions_2";
 const String irPubTopic = "app/ir_read";
 
+volatile bool shouldBlock = false;
+volatile bool unblock = false;
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 IRReceive irReceiver(35);
 LedStrip ledStrip(25, 3, 50);
 
 void callBack(char* topic, byte* payload, unsigned int length) {
-    Serial.print("Message arrived [");
-    Serial.print(topic);
-    Serial.print("] ");
     String message;
     for (int i = 0; i < length; i++) {
         message += (char)payload[i];
     }
+
     int val = message.toInt();
-    if (val != 0) {
+
+    Serial.println(val);
+
+    if (val != 0 && val != 105) {
         ledStrip.testFunc(val);
+        shouldBlock = true; // Enter blocking mode
+    }
+
+    if (val == 105) {
+        unblock = true; // Set unblock flag
+        shouldBlock = false;
     }
 }
 
@@ -51,11 +61,19 @@ void setup() {
 }
 
 void loop() {
-    //Serial.println("Publishing message");
-    uint8_t val = irReceiver.listenForIr();
-    if (val != 0) {
-        client.publish(irPubTopic.c_str(), (clientId + ":" + String(val)).c_str());
+    if (!shouldBlock) {
+        uint8_t val = irReceiver.listenForIr();
+        if (val != 0) {
+            client.publish(irPubTopic.c_str(), (clientId + ":" + String(val)).c_str());
+        }
+    } else {
+        while (!unblock) {
+            client.loop(); 
+            delay(20);
+        }
+        unblock = false; 
     }
+
     client.loop();
-    delay(200); 
+    delay(200);
 }

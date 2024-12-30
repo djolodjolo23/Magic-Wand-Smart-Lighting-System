@@ -26,6 +26,6 @@ void loop() {
     Serial.println("Publishing message");
     client.loop();
 
-    client.publish("test/topic", "Hello from ESP32!");
+    client.publish("app/ir_read", "1");
     delay(5000); 
 }

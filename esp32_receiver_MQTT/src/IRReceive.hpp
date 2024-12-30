@@ -26,11 +26,11 @@ public:
         unsigned long previousMillis = millis();
         while (millis() - previousMillis <= irSignalInterval) {
             int receiverState = digitalRead(irReceiverPin);
-
             if (receiverState == LOW) {
                 iRReceiveCounter++;
             }
         }
+        Serial.println(iRReceiveCounter);
         return iRReceiveCounter;
     }
 

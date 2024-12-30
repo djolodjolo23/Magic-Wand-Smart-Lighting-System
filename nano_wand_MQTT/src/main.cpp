@@ -54,8 +54,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void setup() {
     Serial.begin(9600);
-    while (!Serial);
-
     Serial.print("Connecting to Wi-Fi...");
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {

@@ -8,6 +8,10 @@ const char* ssid = "Tele2_108703";
 const char* password = "q2yymgzk";
 const char* mqtt_server = "192.168.0.24";
 
+const String clientId = "2";
+const String motionSubTopic = "app/motions_2";
+const String irPubTopic = "app/ir_read";
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 IRReceive irReceiver(35);
@@ -21,10 +25,10 @@ void callBack(char* topic, byte* payload, unsigned int length) {
     for (int i = 0; i < length; i++) {
         message += (char)payload[i];
     }
-    Serial.print("Message: ");
-    Serial.println(message);
-
-
+    int val = message.toInt();
+    if (val != 0) {
+        ledStrip.testFunc(val);
+    }
 }
 
 
@@ -34,18 +38,24 @@ void setup() {
     while (WiFi.status() != WL_CONNECTED) {
         delay(1000);
     }
+
+    while (!client.connected()) {
+        client.setServer(mqtt_server, 1883);
+        client.setCallback(callBack);
+        if (client.connect(clientId.c_str())) {
+            client.subscribe(motionSubTopic.c_str());
+        }
+    }
     Serial.println("Connected to WiFi");
     client.setServer(mqtt_server, 1883);
-    client.connect("ESP32Client");
 }
 
 void loop() {
-    if (!client.connected()) {
-        client.connect("ESP32Client");
+    //Serial.println("Publishing message");
+    uint8_t val = irReceiver.listenForIr();
+    if (val != 0) {
+        client.publish(irPubTopic.c_str(), (clientId + ":" + String(val)).c_str());
     }
-    Serial.println("Publishing message");
     client.loop();
-
-    client.publish("app/ir_read", "1");
-    delay(5000); 
+    delay(200); 
 }

@@ -8,7 +8,10 @@ const char* mqtt_server = "192.168.0.24";
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
-String messages[3]= {};
+int client1IrValue = 0;
+int client2IrValue = 0;
+int client3IrValue = 0;
+
 
 void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print("Message arrived [");
@@ -20,8 +23,32 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     Serial.print("Message: ");
     Serial.println(message);
-    if (String(topic) == "app/ir_read") {
-        Serial.println("IR read message received");
+
+    int clientID = 0;
+    int value = 0;
+
+    int separatorIndex = message.indexOf(':');
+    if (separatorIndex != -1) {
+        clientID = message.substring(0, separatorIndex).toInt();
+        value = message.substring(separatorIndex + 1).toInt();
+    }
+
+    if (clientID == 1) {
+        client1IrValue = value;
+    } else if (clientID == 2) {
+        client2IrValue = value;
+    } else if (clientID == 3) {
+        client3IrValue = value;
+    }
+    if (client1IrValue >= client2IrValue && client1IrValue >= client3IrValue) {
+        Serial.println("Client 1 has the highest value");
+        //client.publish("app/motions_1", "12345");
+    } else if (client2IrValue >= client1IrValue && client2IrValue >= client3IrValue) {
+        Serial.println("Client 2 has the highest value");
+        //client.publish("app/motions_2", "12345");
+    } else if (client3IrValue >= client1IrValue && client3IrValue >= client2IrValue) {
+        Serial.println("Client 3 has the highest value");
+        //client.publish("app/motions_3", "12345");
     }
 }
 

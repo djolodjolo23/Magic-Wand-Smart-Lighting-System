@@ -30,7 +30,7 @@ private:
     int   angleIndex;             
     bool  angleBuffersInitialized; 
 
-    static constexpr float ROLL_THRESHOLD        = 4.0f; // modifiable
+    static constexpr float ROLL_THRESHOLD        = 5.0f; // modifiable
     static constexpr float PITCH_SPIKE_THRESHOLD = 10.0f; // modifiable
     static constexpr float YAW_SPIKE_THRESHOLD   = 10.0f; // modifiable
 
@@ -52,6 +52,10 @@ private:
     static constexpr unsigned long EVENT_COOLDOWN     = 600; // modifiable
     static constexpr unsigned long ROLL_MODE_TIMEOUT  = 500; // modifiable
     unsigned long lastEventTime;
+
+    float rollOffset = 0.0f;
+    float pitchOffset = 0.0f;
+    float yawOffset = 0.0f;
 
     // ---------------------------------------
     // 1) Time-window-based diff accumulation
@@ -373,6 +377,16 @@ public:
         }
     }
 
+    void zeroOrientation() {
+        //float currentRoll = fusion.getRoll();
+        float currentPitch = fusion.getPitch();
+        float currentYaw = fusion.getYaw();
+
+        //rollOffset = currentRoll;
+        pitchOffset = currentPitch;
+        yawOffset = currentYaw;
+    }
+
 
     // Debug motion function
     // This function prints the roll, pitch, and yaw values to the Serial Monitor
@@ -417,9 +431,13 @@ public:
             // I think Madgwicks is more stable
             fusion.MadgwickUpdate(gx, gy, gz, ax, ay, az, deltat);
 
-            roll  = fusion.getRoll();
-            pitch = fusion.getPitch();
-            yaw   = fusion.getYaw();
+            float rawRoll = fusion.getRoll();
+            float rawPitch = fusion.getPitch();
+            float rawYaw = fusion.getYaw();
+
+            roll = rawRoll - rollOffset;
+            pitch = rawPitch - pitchOffset;
+            yaw = rawYaw - yawOffset;
 
             smoothAngles();
             updateBuffers();

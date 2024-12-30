@@ -36,50 +36,51 @@ void setup() {
 void loop() {
     long previousMillis = millis(); 
     const long interval = 1000;
-    uint8_t value = motionHandler.processMotion();
-    if (value > 0) {
-        Serial.println(value);
-    }     
-    // delay(20);
-    //BLINKING RED LED WHILE WAITING FOR CONNECTION
-    // while (!btPeripheral.isConnectedToCentral()) {
-    //     leds.blinkRed(200);
-    //     if (millis() - previousMillis >= interval) {
-    //         previousMillis = millis();
-    //         Serial.println("Waiting for connection...");
-    //     }
+    // while(true) {
+    //     motionHandler.debugMotion();
+    //     delay(20);
     // }
 
-    // // BLINKING ALL LEDS TOGETHER
-    // if (digitalRead(BUTTON_PIN) == LOW) {
-    //     leds.blinkAllTogether(200);
-    //     irControlBleSense.update();
-    //     btPeripheral.pool();
-    //     if (btPeripheral.ifCharacteristicWritten()) {
-    //         uint8_t value = btPeripheral.readValue();
-    //         // 106 IS THE ACKNOWLEDGEMENT FOR STARTING MOTION STREAM, RECEIVED FROM CENTRAL (ESP32)
-    //         if (value >= 106 && value <= 108) {
-    //             // MOTION STREAM, BLINKING ALL LEDS SIMULTANEOUSLY
-    //             while (true) {
-    //                 leds.blinkAllSimultaneously(200);
-    //                 uint8_t currentMotion = motionHandler.processMotion();
-    //                 if (currentMotion > 0) {
-    //                     btPeripheral.updateValue(currentMotion);
-    //                 }
-    //                 delay(20);
-    //                 // ESCAPE MOTION STREAM BY RELEASE OF BUTTON
-    //                 if (digitalRead(BUTTON_PIN) == HIGH) {
-    //                     leds.turnOff();
-    //                     btPeripheral.updateValue(105); // 105 for end of motion stream
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //     } 
-    //     delay(20);
-    // } else {
-    //     leds.turnOff();
-    //     btPeripheral.updateValue(105); // 105 for end of motion stream
-    // }
+    //BLINKING RED LED WHILE WAITING FOR CONNECTION
+    while (!btPeripheral.isConnectedToCentral()) {
+        leds.blinkRed(200);
+        if (millis() - previousMillis >= interval) {
+            previousMillis = millis();
+            Serial.println("Waiting for connection...");
+        }
+    }
+
+    // BLINKING ALL LEDS TOGETHER
+    if (digitalRead(BUTTON_PIN) == LOW) {
+        leds.blinkAllTogether(200);
+        irControlBleSense.update();
+        btPeripheral.pool();
+        if (btPeripheral.ifCharacteristicWritten()) {
+            uint8_t value = btPeripheral.readValue();
+            // 106 IS THE ACKNOWLEDGEMENT FOR STARTING MOTION STREAM, RECEIVED FROM CENTRAL (ESP32)
+            if (value >= 106 && value <= 108) {
+                motionHandler.zeroOrientation();
+                // MOTION STREAM, BLINKING ALL LEDS SIMULTANEOUSLY
+                while (true) {
+                    leds.blinkAllSimultaneously(200);
+                    uint8_t currentMotion = motionHandler.processMotion();
+                    if (currentMotion > 0) {
+                        btPeripheral.updateValue(currentMotion);
+                    }
+                    delay(20);
+                    // ESCAPE MOTION STREAM BY RELEASE OF BUTTON
+                    if (digitalRead(BUTTON_PIN) == HIGH) {
+                        leds.turnOff();
+                        btPeripheral.updateValue(105); // 105 for end of motion stream
+                        break;
+                    }
+                }
+            }
+        } 
+        delay(20);
+    } else {
+        leds.turnOff();
+        btPeripheral.updateValue(105); // 105 for end of motion stream
+    }
 
 }

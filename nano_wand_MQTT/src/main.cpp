@@ -11,7 +11,9 @@ const char* password = "123456789";
 const char* mqtt_server = "192.168.0.24";
 const char* mqtt_client_id = "NanoClient";  // Unique ID for this device
 const char* mqtt_sub_topic = "app/ir_read";
-const char* mqtt_pub_topic = "app/motions_2";
+const char* mqtt_pub_topic_2 = "app/motions_2";
+const char* mqtt_pub_topic_1 = "app/motions_1";
+const char* mqtt_pub_topic_3 = "app/motions_3";
 
 const int BUTTON_PIN = 3;
 
@@ -56,6 +58,22 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
     if (client1IrValue >= client2IrValue && client1IrValue >= client3IrValue) {
         Serial.println("Client 1 has the highest value");
+        while (true) {
+            leds.blinkAllSimultaneously(200);
+
+            uint8_t currentMotion = motionHandler.processMotion();
+            if (currentMotion > 0) {
+                client.publish(mqtt_pub_topic_1, String(currentMotion).c_str());
+            }
+            delay(20);
+
+            // Escape motion stream on button release
+            if (digitalRead(BUTTON_PIN) == HIGH) {
+                leds.turnOff();
+                client.publish(mqtt_pub_topic_1, "105");  // 105 signals "stop"
+                break;
+            }
+        }
 
     } else if (client2IrValue >= client1IrValue && client2IrValue >= client3IrValue) {
         Serial.println("Client 2 has the highest value");
@@ -66,21 +84,36 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
             uint8_t currentMotion = motionHandler.processMotion();
             if (currentMotion > 0) {
-                client.publish(mqtt_pub_topic, String(currentMotion).c_str());
+                client.publish(mqtt_pub_topic_2, String(currentMotion).c_str());
             }
             delay(20);
 
             // Escape motion stream on button release
             if (digitalRead(BUTTON_PIN) == HIGH) {
                 leds.turnOff();
-                client.publish(mqtt_pub_topic, "105");  // 105 signals "stop"
+                client.publish(mqtt_pub_topic_2, "105");  // 105 signals "stop"
                 break;
             }
         }
 
     } else if (client3IrValue >= client1IrValue && client3IrValue >= client2IrValue) {
         Serial.println("Client 3 has the highest value");
-        // Do something for client 3
+        while (true) {
+            leds.blinkAllSimultaneously(200);
+
+            uint8_t currentMotion = motionHandler.processMotion();
+            if (currentMotion > 0) {
+                client.publish(mqtt_pub_topic_3, String(currentMotion).c_str());
+            }
+            delay(20);
+
+            // Escape motion stream on button release
+            if (digitalRead(BUTTON_PIN) == HIGH) {
+                leds.turnOff();
+                client.publish(mqtt_pub_topic_3, "105");  // 105 signals "stop"
+                break;
+            }
+        }
     }
 }
 

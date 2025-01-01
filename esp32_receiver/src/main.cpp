@@ -44,8 +44,6 @@ void loop() {
   }
 
   uint8_t biggestVal = irReceiver.listenForIr();
-  Serial.print("Biggest val: ");
-  Serial.println(biggestVal);
   if (biggestVal != 109) { // 109 is the unsuccesful ack value
     btCentral.writeValue(biggestVal);
     while (true) {

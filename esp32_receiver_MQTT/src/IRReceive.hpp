@@ -13,7 +13,6 @@ private:
   
 
 public:
-    const long interval = 5;
     IRReceive(u_int8_t irReceiverPin)
     : irReceiverPin(irReceiverPin)
     {
@@ -34,5 +33,20 @@ public:
         return iRReceiveCounter;
     }
 
+    uint8_t listenForIrUpdated() {
+        iRReceiveCounter = 0;
+        if (digitalRead(irReceiverPin) == LOW) {
+            unsigned long previousMillis = millis();
+            while (millis() - previousMillis <= irSignalInterval) {
+                if (digitalRead(irReceiverPin) == LOW) {
+                    iRReceiveCounter++;
+                }
+            }
+            return iRReceiveCounter;
+        } else {
+            return 0;
+        }
+        
+    }
 };
 

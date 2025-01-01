@@ -11,7 +11,7 @@ private:
     Adafruit_NeoPixel strip;
     bool on = false;
 
-    uint32_t colors[3]; 
+    uint32_t colors[6]; 
 
     int currentColorIndex = 0;
 
@@ -28,6 +28,9 @@ public:
         colors[0] = strip.Color(255, 0, 0); // Red
         colors[1] = strip.Color(0, 255, 0); // Green
         colors[2] = strip.Color(0, 0, 255); // Blue
+        colors[3] = strip.Color(255, 255, 0); // Yellow
+        colors[4] = strip.Color(255, 0, 255); // Magenta
+        colors[5] = strip.Color(0, 255, 255); // Cyan
     }
 
     void setBrightness(int bright) {

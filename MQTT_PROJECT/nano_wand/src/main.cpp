@@ -4,6 +4,7 @@
 #include "MotionHandler.hpp"
 #include "Leds.hpp"
 #include "IRControl.hpp"
+#include "FlatVibrationMotor.hpp"
 
 // -----------------------------------------------------------------------------
 // Wi-Fi & MQTT Credentials
@@ -23,12 +24,14 @@ const char* mqtt_pub_topic_3 = "app/motions_3";
 // Pins & Globals
 // -----------------------------------------------------------------------------
 const int BUTTON_PIN = 3;
+const int VIBRATION_MOTOR_PIN = 5;
 
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 MotionHandler motionHandler;
 IRControl irControl(25);
 Leds leds(14, 16, 18);
+FlatVibrationMotor vibrationMotor(VIBRATION_MOTOR_PIN);
 
 // IR values & flags
 int  client1IrValue   = 0;
@@ -53,6 +56,9 @@ void resetClientValues() {
 }
 
 void processMotionBlock(String topic) {
+    int vibrationState = 0;   // 0: no vibration, 1: first vibration, 2: second vibration, 3: done
+    unsigned long vibrationStart = millis();  // Track when vibration started
+
     while (true) {
         leds.blinkAllSimultaneously(200);
 
@@ -61,6 +67,23 @@ void processMotionBlock(String topic) {
             client.publish(topic.c_str(), String(currentMotion).c_str());
         }
         delay(20);
+
+        // Handle non-blocking vibration logic
+        if (vibrationState < 3) {
+            unsigned long currentMillis = millis();
+            if (vibrationState == 0) {
+                vibrationMotor.vibrate(100); // Trigger the first short vibration
+                vibrationState = 1;
+                vibrationStart = currentMillis;
+            } else if (vibrationState == 1 && currentMillis - vibrationStart >= 150) {
+                vibrationMotor.vibrate(100); // Trigger the second short vibration
+                vibrationState = 2;
+                vibrationStart = currentMillis;
+            } else if (vibrationState == 2 && currentMillis - vibrationStart >= 150) {
+                vibrationMotor.vibrate(0); // Ensure motor is off after vibrations
+                vibrationState = 3; // Mark vibrations as completed
+            }
+        }
 
         // Escape motion stream on button release
         if (digitalRead(BUTTON_PIN) == HIGH) {
@@ -71,19 +94,20 @@ void processMotionBlock(String topic) {
     }
 }
 
+
 // -----------------------------------------------------------------------------
 // Compare and Block Function
 // -----------------------------------------------------------------------------
 void compareAndBlock() {
     // Decide who has the highest IR value:
     if (client1IrValue >= client2IrValue && client1IrValue >= client3IrValue) {
-        Serial.println("Client 1 has the highest value");
+        //Serial.println("Client 1 has the highest value"); // debug
         processMotionBlock(mqtt_pub_topic_1);
     } else if (client2IrValue >= client1IrValue && client2IrValue >= client3IrValue) {
-        Serial.println("Client 2 has the highest value");
+        //Serial.println("Client 2 has the highest value"); // debug
         processMotionBlock(mqtt_pub_topic_2);
     } else if (client3IrValue >= client1IrValue && client3IrValue >= client2IrValue) {
-        Serial.println("Client 3 has the highest value");
+        //Serial.println("Client 3 has the highest value"); // debug
         processMotionBlock(mqtt_pub_topic_3);
     }
 
@@ -188,7 +212,8 @@ void connectToMQTT() {
 // Setup & Loop
 // -----------------------------------------------------------------------------
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(9600);    
+
 
     pinMode(BUTTON_PIN, INPUT_PULLUP);
     motionHandler.init();
